@@ -1,0 +1,98 @@
+.Timer {
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    position: fixed;
+    filter: contrast(20);
+    // background-color: black;
+    overflow: hidden;
+    span {
+        color: rgb(230,255,230);
+        font-size: 8rem;
+        font-weight: 700;
+        text-align: center;
+        text-transform: uppercase;
+        line-height: 1;
+        filter: blur(0.2rem);
+        display: block;
+        transition: all 1.5s ease;
+        opacity: 0;
+        filter: blur(0.6rem);
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        &:nth-child(1) {
+          animation: letteranim 11s infinite ease;
+          animation-delay: 0s;
+        }
+        &:nth-child(2) {
+          animation: letteranim 11s infinite ease;
+          animation-delay: 1s;
+        }
+        &:nth-child(3) {
+          animation: letteranim 11s infinite ease;
+          animation-delay: 2s;
+        }
+        &:nth-child(4) {
+          animation: letteranim 11s infinite ease;
+          animation-delay: 3s;
+        }
+        &:nth-child(5) {
+          animation: letteranim 11s infinite ease;
+          animation-delay: 4s;
+        }
+        &:nth-child(6) {
+          animation: letteranim 11s infinite ease;
+          animation-delay: 5s;
+        }
+        &:nth-child(7) {
+          animation: letteranim 11s infinite ease;
+          animation-delay: 6s;
+        }
+        &:nth-child(8) {
+          animation: letteranim 11s infinite ease;
+          animation-delay: 7s;
+        }
+        &:nth-child(9) {
+          animation: letteranim 11s infinite ease;
+          animation-delay: 8s;
+        }
+        &:nth-child(10) {
+          animation: letteranim 11s infinite ease;
+          animation-delay: 9s;
+        }
+        &:nth-child(11) {
+          animation: letteranim 11s infinite ease;
+          animation-delay: 10s;
+        }
+          &:nth-child(12) {
+          animation: letteranim 11s infinite ease;
+          animation-delay: 15s;
+        }
+      }
+  }
+  
+  @keyframes letteranim {
+    0% {
+      opacity: 0;
+      filter: blur(0.6rem);
+    }
+    5% {
+      opacity: 1;
+      filter: blur(0.2rem);
+    }
+    10% {
+      opacity: 1;
+      filter: blur(0.2rem);
+    }
+    20% {
+      opacity: 0;
+      filter: blur(0.6rem);
+    }
+    100% {
+      opacity: 0;
+      filter: blur(0.6rem);
+    }
+  }

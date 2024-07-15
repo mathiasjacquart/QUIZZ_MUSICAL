@@ -1,0 +1,39 @@
+.btn {
+  padding: 8px 15px;
+  border-radius: 20px;
+
+}
+
+.btn-primary {
+  background-color: var(--primary) !important;
+  font-family: "Playwrite CU", cursive;
+  font-size: 0.7rem;
+  color: white;
+  border: 2px solid var(--primary);
+  padding: 15px 20px;
+  width: 400px;
+  cursor: pointer !important;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.2s opacity;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+.btn-reverse-primary {
+  border: 2px solid var(--primary);
+  color: var(--primary);
+  background-color: white;
+}
+
+.card {
+  border-radius: 20px;
+  background-color: white;
+}
+
+.active {
+  font-weight: 500;
+  color: var(--primary);
+}
