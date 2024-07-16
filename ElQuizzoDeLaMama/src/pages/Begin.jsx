@@ -22,7 +22,7 @@ export default function Begin() {
         <h1>Bienvenue sur Quizzical</h1>
         <div className={``}>
           <form onSubmit={handleSubmit}>
-            <label htmlFor="username">Choisis ton blaze :</label>
+            <label htmlFor="username">Choisis ton pseudo:</label>
             <input id="username" type="text" />
             <div className='d-flex justify-content-center'>
               <button className='btn-primary' type='submit'>C'est parti les poupis</button>

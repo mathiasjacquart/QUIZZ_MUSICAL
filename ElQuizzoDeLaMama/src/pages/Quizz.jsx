@@ -1,46 +1,7 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import styles from './Quizz.module.scss';
 import { UserContext } from '../context/context';
-
-const clientId = '64633da727fe4789a47cf1fa1283f945';
-const clientSecret = 'd458b9922c894cf393470852f0b62b94';
-
-const getSpotifyToken = async () => {
-  const url = 'https://accounts.spotify.com/api/token';
-  const body = 'grant_type=client_credentials';
-
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'Authorization': 'Basic ' + btoa(`${clientId}:${clientSecret}`)
-    },
-    body: body
-  });
-
-  if (response.ok) {
-    const data = await response.json();
-    return data.access_token;
-  } else {
-    console.error('Error obtaining token:', response.statusText);
-  }
-};
-
-const getPlaylistDetails = async (playlistId, token) => {
-  const playlist_url = `https://api.spotify.com/v1/playlists/${playlistId}`;
-  const response = await fetch(playlist_url, {
-    headers: {
-      'Authorization': `Bearer ${token}`
-    }
-  });
-
-  if (response.ok) {
-    const playlist = await response.json();
-    return playlist;
-  } else {
-    console.error('Error getting playlist details:', response.statusText);
-  }
-};
+import { getSpotifyToken, getPlaylistDetails } from '../../API/spotifyAPI';
 
 export default function Quiz() {
   const { username } = useContext(UserContext);
@@ -53,15 +14,18 @@ export default function Quiz() {
   const [answer, setAnswer] = useState('');
   const [message, setMessage] = useState('');
   const [completedRounds, setCompletedRounds] = useState(0); // Compteur pour le nombre de manches complétées
+  const [points, setPoints] = useState(0); // État pour les points
+  const audioRef = useRef(null);
+  const [isAutoplayAllowed, setIsAutoplayAllowed] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       const token = await getSpotifyToken();
       setToken(token);
       if (token) {
-        const playlist = await getPlaylistDetails('0EFdkYy5imXOa9hgaRozM3', token); // Utilisez l'ID de la playlist
+        const playlist = await getPlaylistDetails('0EFdkYy5imXOa9hgaRozM3', token);
         setPlaylist(playlist);
-        setCurrentTrack(getRandomTrack(playlist.tracks.items)); // Sélectionner une chanson aléatoire au début
+        setCurrentTrack(getRandomTrack(playlist.tracks.items));
       }
     };
     fetchData();
@@ -74,9 +38,9 @@ export default function Quiz() {
       }, 1000);
       return () => clearInterval(countdown);
     } else {
-        setTimeout(() => { 
-            setCompletedRounds(prevRound => prevRound+1)
-        },2000)
+      setTimeout(() => {
+        setCompletedRounds(prevRounds => prevRounds + 1);
+      }, 2000);
     }
   }, [songSeconds]);
 
@@ -95,6 +59,12 @@ export default function Quiz() {
     }
   }, [completedRounds]);
 
+  useEffect(() => {
+    if (currentTrack && audioRef.current) {
+      playAudio(currentTrack);
+    }
+  }, [currentTrack]);
+
   const getRandomTrack = (tracks) => {
     const randomIndex = Math.floor(Math.random() * tracks.length);
     return tracks[randomIndex].track;
@@ -104,12 +74,26 @@ export default function Quiz() {
     return str.toLowerCase().replace(/[\s\W]/g, '');
   };
 
+  const playAudio = (track) => {
+    if (audioRef.current) {
+      audioRef.current.src = track.preview_url;
+      audioRef.current
+        .play()
+        .then(() => setIsAutoplayAllowed(true))
+        .catch(error => {
+          console.error('Autoplay was prevented:', error);
+          setIsAutoplayAllowed(false);
+          setCurrentTrack(getRandomTrack(playlist.tracks.items)); // Sélectionner une nouvelle chanson aléatoire
+        });
+    }
+  };
+
   const startNextRound = async () => {
-    setPrepSeconds(5); // Réinitialiser le délai de préparation
-    setSongSeconds(30); // Réinitialiser le délai pour chaque chanson
+    setPrepSeconds(5);
+    setSongSeconds(30);
 
     if (playlist) {
-      setCurrentTrack(getRandomTrack(playlist.tracks.items)); // Sélectionner une nouvelle chanson aléatoire
+      setCurrentTrack(getRandomTrack(playlist.tracks.items));
       setRound(prevRound => prevRound + 1);
       setAnswer('');
       setMessage('');
@@ -124,20 +108,22 @@ export default function Quiz() {
       const normalizedArtist = normalizeString(currentTrack.artists[0].name);
 
       if (normalizedAnswer === normalizedTitle || normalizedAnswer === normalizedArtist) {
-        setMessage('Correct!');
+        const pointsEarned = songSeconds * 10;
+        setPoints(prevPoints => prevPoints + pointsEarned);
+        setMessage(`T'es trop fort ${username} ! ${pointsEarned} points pour Griffondor.`);
         setTimeout(() => {
           setCompletedRounds(prevRounds => prevRounds + 1);
-        }, 2000); // Attendre 2 secondes avant de passer à la manche suivante
+        }, 2000);
       } else {
-        setMessage(`Faux, c'était ${currentTrack.name} par ${currentTrack.artists[0].name}`);
+        setMessage(`T'as de la merde dans les oreilles ou quoi ${username}, c'était ${currentTrack.name} par ${currentTrack.artists[0].name}`);
         setTimeout(() => {
-            setCompletedRounds(prevRounds => prevRounds + 1);
-          }, 2000); // Attendre 2 secondes avant de passer à la manche suivante
+          setCompletedRounds(prevRounds => prevRounds + 1);
+        }, 2000);
       }
-    } else if (answer ==="") { 
-        setTimeout(() => {
-            setCompletedRounds(prevRounds => prevRounds + 1);
-          }, 2000);
+    } else if (answer === "") {
+      setTimeout(() => {
+        setCompletedRounds(prevRounds => prevRounds + 1);
+      }, 2000);
     }
   };
 
@@ -145,6 +131,7 @@ export default function Quiz() {
     <div className={styles.Quiz}>
       <div className={styles.center}>
         <p>Manche {round}</p>
+        <p>Points: {points}</p>
         {prepSeconds > 0 ? (
           <>
             <p>Préparez-vous: {prepSeconds}</p>
@@ -157,7 +144,7 @@ export default function Quiz() {
                 {currentTrack && (
                   <div>
                     <p>Écoutez la chanson:</p>
-                    <audio controls autoPlay>
+                    <audio ref={audioRef} autoPlay={isAutoplayAllowed}>
                       <source src={currentTrack.preview_url} type="audio/mpeg" />
                       Your browser does not support the audio element.
                     </audio>
@@ -179,7 +166,7 @@ export default function Quiz() {
                 {completedRounds < 10 ? (
                   <p>Manche suivante dans quelques secondes...</p>
                 ) : (
-                  <p>Quiz terminé!</p>
+                  <p>Quiz terminé! Vous avez accumulé un total de {points} points.</p>
                 )}
               </>
             )}
