@@ -7,7 +7,7 @@ import Background from "./components/Background";
 function App() {
   return (
     <div className={`d-flex mwFull mhFull  ${styles.appContainer}`}>
-       <Background />
+       {/* <Background /> */}
       <UserProvider>
         <Outlet />
       </UserProvider>

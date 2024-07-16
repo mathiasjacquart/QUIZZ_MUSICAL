@@ -32,7 +32,7 @@ getSpotifyToken().then(token => {
 
 // GET PLAY LIST QUIZZ MUSICAL
 
-export async function getPlaylistDetails(playlistId, token) { 
+export async function getPlaylistDetails(playlistId, token) {
     const playlist_url = `https://api.spotify.com/v1/playlists/${playlistId}`;
     const response = await fetch(playlist_url, {
         headers: {
@@ -40,13 +40,13 @@ export async function getPlaylistDetails(playlistId, token) { 
         }
 })
 
-if (response.ok) { 
+if (response.ok) {
     const playlist = await response.json();
     console.log("Playlist details", playlist);
 }else { 
     console.error("Error getting playlist details:", response.statusText);
  }
-}; 
+}
 
 // TOKEN TO GET PLAYLIST 
 

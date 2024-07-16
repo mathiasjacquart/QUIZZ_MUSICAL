@@ -3,6 +3,7 @@ import App from "./App";
 import { Children } from "react";
 import Begin  from "./pages/Begin"
 import Timer from "./components/Timer";
+import Quiz from "./pages/Quizz";
 
 export const router = createBrowserRouter ([
     {
@@ -16,6 +17,10 @@ export const router = createBrowserRouter ([
             {
                 path:"/countdown",
                 element: <Timer/>
+            }, 
+            {
+                path:"/quizz", 
+                element:<Quiz/>
             }
         ]
     }

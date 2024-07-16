@@ -1,108 +1,111 @@
 .Timer {
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    position: fixed;
-    filter: contrast(20);
-    // background-color: black;
-    overflow: hidden;
-    p { 
-      color: white !important;
-      font-size: 6rem;
-      font-weight: 700;
-      text-align: center;
-      text-transform: uppercase;
-    }
-    span {
-        color: var(--primary);
-        font-size: 6rem;
-        font-weight: 700;
-        text-align: center;
-        text-transform: uppercase;
-        line-height: 1;
-        filter: blur(0.2rem);
-        display: block;
-        transition: all 1.5s ease;
-        opacity: 0;
-        filter: blur(0.6rem);
-        position: absolute;
-        z-index: 330;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        &:nth-child(1) {
-          animation: letteranim 11s infinite ease;
-          animation-delay: 0s;
-        }
-        &:nth-child(2) {
-          animation: letteranim 11s infinite ease;
-          animation-delay: 1s;
-        }
-        &:nth-child(3) {
-          animation: letteranim 11s infinite ease;
-          animation-delay: 2s;
-        }
-        &:nth-child(4) {
-          animation: letteranim 11s infinite ease;
-          animation-delay: 3s;
-        }
-        &:nth-child(5) {
-          animation: letteranim 11s infinite ease;
-          animation-delay: 4s;
-        }
-        &:nth-child(6) {
-          animation: letteranim 11s infinite ease;
-          animation-delay: 5s;
-        }
-        &:nth-child(7) {
-          animation: letteranim 11s infinite ease;
-          animation-delay: 6s;
-        }
-        &:nth-child(8) {
-          animation: letteranim 11s infinite ease;
-          animation-delay: 7s;
-        }
-        &:nth-child(9) {
-          animation: letteranim 11s infinite ease;
-          animation-delay: 8s;
-        }
-        &:nth-child(10) {
-          animation: letteranim 11s infinite ease;
-          animation-delay: 9s;
-        }
-        &:nth-child(11) {
-          animation: letteranim 11s infinite ease;
-          animation-delay: 10s;
-        }
-          &:nth-child(12) {
-          animation: letteranim 11s infinite ease;
-          animation-delay: 15s;
-        }
-      }
-  }
-  
-  @keyframes letteranim {
-    0% {
-      opacity: 0;
-      filter: blur(0.6rem);
-    }
-    5% {
-      opacity: 1;
-      filter: blur(0.2rem);
-    }
-    10% {
-      opacity: 1;
-      filter: blur(0.2rem);
-    }
-    20% {
-      opacity: 0;
-      filter: blur(0.6rem);
-    }
-    100% {
-      opacity: 0;
-      filter: blur(0.6rem);
-    }
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh; /* Vue pleine hauteur pour centrer verticalement */
+ 
+
+  .center {
+    position: relative;
+    width: 500px;
+    height: 500px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    background-color: #fff; /* Couleur de fond de la boîte du timer */
+    border-radius: 10px; /* Bordures arrondies */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Ombre pour un effet de profondeur */
   }
 
-  
+  .text {
+    color: var(--primary);
+    font-size: 6rem;
+    font-weight: 700;
+    text-align: center;
+    text-transform: uppercase;
+    line-height: 1;
+    filter: blur(0.2rem);
+    display: block;
+    transition: all 1.5s ease;
+    opacity: 0;
+    filter: blur(0.6rem);
+    position: absolute;
+    z-index: 330;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    &:nth-child(1) {
+      animation: letteranim 11s infinite ease;
+      animation-delay: 0s;
+    }
+    &:nth-child(2) {
+      animation: letteranim 11s infinite ease;
+      animation-delay: 1s;
+    }
+    &:nth-child(3) {
+      animation: letteranim 11s infinite ease;
+      animation-delay: 2s;
+    }
+    &:nth-child(4) {
+      animation: letteranim 11s infinite ease;
+      animation-delay: 3s;
+    }
+    &:nth-child(5) {
+      animation: letteranim 11s infinite ease;
+      animation-delay: 4s;
+    }
+    &:nth-child(6) {
+      animation: letteranim 11s infinite ease;
+      animation-delay: 5s;
+    }
+    &:nth-child(7) {
+      animation: letteranim 11s infinite ease;
+      animation-delay: 6s;
+    }
+    &:nth-child(8) {
+      animation: letteranim 11s infinite ease;
+      animation-delay: 7s;
+    }
+    &:nth-child(9) {
+      animation: letteranim 11s infinite ease;
+      animation-delay: 8s;
+    }
+    &:nth-child(10) {
+      animation: letteranim 11s infinite ease;
+      animation-delay: 9s;
+    }
+    &:nth-child(11) {
+      animation: letteranim 11s infinite ease;
+      animation-delay: 10s;
+    }
+    &:nth-child(12) {
+      animation: letteranim 11s infinite ease;
+      animation-delay: 15s;
+    }
+  }
+}
+
+@keyframes letteranim {
+  0% {
+    opacity: 0;
+    filter: blur(0.6rem);
+  }
+  5% {
+    opacity: 1;
+    filter: blur(0.2rem);
+  }
+  10% {
+    opacity: 1;
+    filter: blur(0.2rem);
+  }
+  20% {
+    opacity: 0;
+    filter: blur(0.6rem);
+  }
+  100% {
+    opacity: 0;
+    filter: blur(0.6rem);
+  }
+}
