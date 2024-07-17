@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import styles from './Quizz.module.scss';
 import { UserContext } from '../context/context';
-import { getSpotifyToken, getPlaylistDetails } from '../../API/spotifyAPI';
+import { getSpotifyToken, getPlaylistDetails } from '../../FRONT/API/spotifyAPI';
 
 export default function Quiz() {
   const { username } = useContext(UserContext);
@@ -101,6 +101,7 @@ export default function Quiz() {
   };
 
   const handleSubmit = (e) => {
+   
     e.preventDefault();
     if (currentTrack) {
       const normalizedAnswer = normalizeString(answer);
@@ -129,22 +130,32 @@ export default function Quiz() {
 
   return (
     <div className={styles.Quiz}>
+       <div className={styles.countdown}> 
+        <p >{songSeconds}</p>
+       </div>
+       <div className={styles.points}> 
+       <p>Puntos <span>{points}</span></p>
+       </div>
       <div className={styles.center}>
+        <div className={styles.manche}>
         <p>Manche {round}</p>
-        <p>Points: {points}</p>
+        </div>
+      
+        
         {prepSeconds > 0 ? (
           <>
-            <p>Préparez-vous: {prepSeconds}</p>
+            <p>Préparez-vous</p> 
+            <p> {prepSeconds}</p>
           </>
         ) : (
           <>
             {songSeconds > 0 ? (
               <>
-                <p>Temps restant: {songSeconds}</p>
+                
                 {currentTrack && (
                   <div>
-                    <p>Écoutez la chanson:</p>
-                    <audio ref={audioRef} autoPlay={isAutoplayAllowed}>
+                    
+                    <audio ref={audioRef} controls autoPlay={isAutoplayAllowed}>
                       <source src={currentTrack.preview_url} type="audio/mpeg" />
                       Your browser does not support the audio element.
                     </audio>
@@ -157,16 +168,20 @@ export default function Quiz() {
                     onChange={(e) => setAnswer(e.target.value)}
                     placeholder="Entrez l'artiste ou le titre"
                   />
-                  <button type="submit">Submit</button>
+                  <button className='btn-primary' type="submit">Envoyer</button>
                 </form>
-                {message && <p>{message}</p>}
+               <div className={styles.message}>{message && <p>{message}</p>} </div> 
               </>
             ) : (
               <>
                 {completedRounds < 10 ? (
-                  <p>Manche suivante dans quelques secondes...</p>
+                  <p className={styles.nextRound}>Manche suivante dans quelques secondes...</p>
                 ) : (
-                  <p>Quiz terminé! Vous avez accumulé un total de {points} points.</p>
+                  <div>
+                                      <p className={styles.endQuizz}>Quiz terminé! </p>
+                                      <p className={styles.endQuizz}>Vous avez accumulé un total de {points} points.</p>
+                  </div>
+
                 )}
               </>
             )}

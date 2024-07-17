@@ -1,81 +1,64 @@
-@mixin dots($count) {
-  $text-shadow: ();
-  @for $i from 0 through $count {
-    $text-shadow: $text-shadow,
-                 (-.5+(random()) * 3) + em
-                 (-.5+(random()) * 3) + em
-                 7px
-                 hsla(random() * 360, 100%, 50%, .9);
-  }
-  text-shadow: $text-shadow;
+// Background.module.scss
+$total: 144;
+$time: 4;
+$height: 400;
+$percent: .69444%;
+$dotSize: .9;
+
+* {
+  box-sizing: border-box;
 }
 
 html, body {
-  margin: 0;
-  padding: 0;
-  width: 100%;
   height: 100%;
+}
+
+body {
+  background: black;
   overflow: hidden;
 }
 
-.background {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
+.wrap {
+  position: relative;
   height: 100%;
-  background: #123;
-  z-index: -1;
-  overflow: hidden;
 }
 
-.body, .head {
-  display: block;
-  font-size: 52px;
-//   color: transparent;
-}
-
-.head::before, .head::after,
-.body::before, .body::after {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  width: 3em;
-  height: 3em;
-  content: '.';
-  mix-blend-mode: screen;
-  animation: 44s -27s move infinite ease-in-out alternate;
-}
-
-.body::before {
-  @include dots(40);
-  animation-duration: 44s;
-  animation-delay: -27s;
-}
-
-.body::after {
-  @include dots(40);
-  animation-duration: 43s;
-  animation-delay: -32s;
-}
-
-.head::before {
-  @include dots(40);
-  animation-duration: 42s;
-  animation-delay: -23s;
-}
-
-.head::after {
-  @include dots(40);
-  animation-duration: 41s;
-  animation-delay: -19s;
-}
-
-@keyframes move {
-  from {
-    transform: rotate(0deg) scale(12) translateX(-20px);
+.c {
+  position: relative;
+  height: $height + px;
+  width: $percent;
+  margin-top: -$height + px;
+  animation: drop $time + s infinite ease-in;
+  &:after {
+    content: "";
+    position: absolute;
+    width: $dotSize + vw;
+    height: $dotSize + vw;
+    border-radius: 50%;
+    left: 50%;
+    bottom: -($dotSize / 2) + vw;
+    margin-left: -($dotSize / 2) + vw;
   }
-  to {
-    transform: rotate(360deg) scale(18) translateX(20px);
+}
+
+@for $i from 1 through $total {
+  $hue: (300 / $total) * $i;
+  .c:nth-child(#{$i}) {
+    left: ($i - 1) * $percent;
+    background-image: linear-gradient(to bottom, black, hsla($hue, 100%, 50%, .8));
+    animation-delay: random($total) * ($time / $total) * -1s;
+    &:after {
+      background: hsla($hue, 100%, 50%, 1);
+    }
+  }
+}
+
+@keyframes drop {
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(0, 150vh, 0);
+    opacity: 0;
   }
 }

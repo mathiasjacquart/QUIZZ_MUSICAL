@@ -1,13 +1,59 @@
+@use  "../assets/styles/mixins" as mixin;
+
 .Quiz {
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
-    width: 100vw; /* Vue pleine hauteur pour centrer verticalement */
-    background-color: #d86565; /* Couleur de fond */
-  
+    width: 100vw;
+    position: absolute;
+    z-index: 3;
+    
+    .countdown { 
+      position: absolute;
+      z-index: 4;
+      background-color: var(--primary);
+      color: #fff;
+      font-size:1em;
+      width: 50px;
+      height: 50px;
+      right: 50px;
+      top:50px;
+      border-radius: 50px;
+      p {
+        font-size: 30px;
+        margin-block-start: 0px;
+        margin-block-end: 0px;
+        text-align: center;
+
+      }
+    }
+    .points {
+      position: absolute;
+      z-index: 5;
+      background-color: var(--primary);
+      color: #fff;
+      font-size:1em;
+      width: 100px;
+      height: 100px;
+      left: 50px;
+      top:50px;
+      border-radius: 20px;
+      p {
+        font-size:20px;
+        margin-block-start: 0px;
+        margin-block-end: 0px;
+        text-align: center;
+        // height: 100%;
+        span {
+          font-size:  50px;
+        }
+      }
+    }
     .center {
+      padding: 20px 40px;
       width: 500px;
+      height: 350px;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -15,13 +61,55 @@
       background-color: #fff; /* Couleur de fond de la boîte du quiz */
       border-radius: 10px; /* Bordures arrondies */
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Ombre pour un effet de profondeur */
-      padding: 20px; /* Padding pour espacer le contenu */
+      @include mixin.xs { 
+        width: 300px;
+        padding: 20px 30px;}
       text-align: center;
-  
+
+      .manche {
+        position: absolute;
+        background-color: var(--primary);
+        color: #fff;
+        width: 500px;
+        z-index: 1;
+        top:170px;
+        border-top-right-radius: 10px;
+        border-top-left-radius: 10px;
+        @include mixin.xs { 
+          width: 300px;
+          top:200px;
+      }
+        p { 
+          color: #fff;
+          @include mixin.xs { 
+            font-size: 30px;
+        }
+        }
+        
+      }
+      .message {
+        p {
+          font-size: 20px;
+          color: rgb(179, 0, 0);
+          
+        }
+      }
+      .nextRound{
+        font-size: 30px;
+        @include mixin.xs { 
+          
+      }
+      }
+      .endQuizz {
+        font-size: 30px;
+      }
       p {
-        font-size: 1.5rem;
+        font-size: 50px;
         margin: 10px 0;
-        color: #333;
+        color: var(--primary);
+        @include mixin.xs { 
+         font-size: 30px;
+      }
       }
   
       form {
@@ -37,6 +125,9 @@
           border-radius: 5px;
           border: 1px solid #ccc;
           width: 100%;
+          @include mixin.xs { 
+            width: 200px;
+        }
         }
   
         button {
@@ -48,6 +139,10 @@
           border-radius: 5px;
           cursor: pointer;
           transition: background-color 0.3s ease;
+          @include mixin.xs { 
+            width: 200px;
+        }
+
   
           &:hover {
             background-color: #0056b3;

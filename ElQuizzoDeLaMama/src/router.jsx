@@ -4,6 +4,7 @@ import { Children } from "react";
 import Begin  from "./pages/Begin"
 import Timer from "./components/Timer";
 import Quiz from "./pages/Quizz";
+import Lobby from "./pages/Lobby";
 
 export const router = createBrowserRouter ([
     {
@@ -19,9 +20,13 @@ export const router = createBrowserRouter ([
                 element: <Timer/>
             }, 
             {
-                path:"/quizz", 
+                path:"/quiz", 
                 element:<Quiz/>
-            }
+            },
+            {
+                path:"/lobby", 
+                element:<Lobby/>
+            },
         ]
     }
 ]);

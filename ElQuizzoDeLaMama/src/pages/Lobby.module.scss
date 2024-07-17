@@ -1,0 +1,93 @@
+@use  "../assets/styles/mixins" as mixin;
+
+.Lobby {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100vw;
+    position: absolute;
+    z-index: 3;
+    .center {
+       
+        width: 500px;
+        height: 350px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        background-color: #fff; /* Couleur de fond de la boîte du quiz */
+        border-radius: 10px; /* Bordures arrondies */
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Ombre pour un effet de profondeur */
+        @include mixin.xs { 
+          width: 300px;
+          }
+        text-align: center;
+        h1 { 
+            width: 100%;
+            background-color: var(--primary) !important;
+            font-size: 30px;
+            text-align: center;
+           
+            color: rgb(255, 255, 255);
+    
+            @include mixin.xs { 
+               font-size: 30px;
+            }
+            
+            
+        }
+        p {
+            font-size: 30px;
+            margin: 10px 0;
+            color: var(--primary);
+            @include mixin.xs { 
+             font-size: 30px;
+          }
+          }
+          h2 {
+            font-size: 30px;
+            margin: 10px 0;
+            color: var(--primary);
+            @include mixin.xs { 
+             font-size: 30px;
+          }
+        
+          }
+          h3 {
+            font-size: 30px;
+            margin: 10px 0;
+            color: var(--primary);
+            @include mixin.xs { 
+             font-size: 30px;
+          }
+        
+          }
+        input {
+            width: 300px;
+            padding: 10px;
+            font-size: 1rem;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            
+            @include mixin.xs { 
+              width: 200px;
+          }
+          }
+          ul {
+            li { 
+                font-size: 20px;
+            }
+          }
+          button{
+            margin-top: 25px;
+            @include mixin.xs { 
+                width: 200px;
+            }
+          }
+
+        }
+
+}
+
