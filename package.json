@@ -1,0 +1,20 @@
+{
+  "name": "elquizzodelamama",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "server": "nodemon BACK/server.js",
+    "start": "node BACK/server.js",
+    "build": "npm install & npm install --prefix FRONT && npm run build --prefix"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.19.2",
+    "socket.io": "^4.7.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
+}
