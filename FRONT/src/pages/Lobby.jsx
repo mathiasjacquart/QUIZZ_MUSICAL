@@ -3,7 +3,9 @@ import { UserContext } from '../context/context';
 import { useNavigate } from "react-router-dom";
 import styles from "./Lobby.module.scss";
 
-const socket = new WebSocket('ws://localhost:8080');
+// const socket = new WebSocket('ws://localhost:8080');
+const socket = new WebSocket('https://quizz-musical.onrender.com');
+
 
 export default function Lobby() {
   const { username, roomId, setRoomId } = useContext(UserContext); // Ajout de roomId et setRoomId
