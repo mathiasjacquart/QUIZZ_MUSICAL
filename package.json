@@ -6,7 +6,7 @@
   "scripts": {
     "server": "nodemon BACK/server.js",
     "start": "node BACK/server.js",
-    "build": "npm install & npm install --prefix FRONT && npm run build --prefix"
+    "build": "npm install & npm install --prefix FRONT && npm run build --prefix FRONT"
   },
   "author": "",
   "license": "ISC",
