@@ -56,6 +56,7 @@ export default function Quiz() {
 
   useEffect(() => {
     if (completedRounds === 10) {
+       console.log('Sending score to server:', { type: 'submit_score', roomId, username, points });
       socket.send(JSON.stringify({ type: 'submit_score', roomId, username, points }));
     }
   }, [completedRounds, points, roomId, username, socket]);
@@ -171,7 +172,7 @@ export default function Quiz() {
     setGameOver(false);
     navigate('/');
   };
-
+  console.log(completedRounds);
   return (
     <div className={styles.Quiz}>
       <div className={styles.countdown}>

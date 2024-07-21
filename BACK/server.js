@@ -7,8 +7,6 @@ const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
-// const __DIRNAME = path.resolve();
-
 let rooms = {};
 
 wss.on('connection', (ws) => {
@@ -59,7 +57,7 @@ wss.on('connection', (ws) => {
 const handleCreateRoom = (ws, data) => {
   const roomId = generateRoomId();
   console.log(`Creating room with ID ${roomId} for user ${data.username}`);
-  rooms[roomId] = { players: [{ ws, username: data.username, points: 0 }], gameStarted: false, completedRounds: 0, scores: [] };
+  rooms[roomId] = { players: [{ ws, username: data.username, points: 0 }], gameStarted: false, scores: [] };
   ws.send(JSON.stringify({ type: 'room_created', roomId }));
   updateRoomPlayers(roomId);
 };
@@ -89,38 +87,41 @@ const handleStartGame = (data) => {
 
 const handleSubmitScore = (ws, data) => {
   console.log(`Submitting score for user ${data.username} in room ${data.roomId}`);
+  
   const room = rooms[data.roomId];
-  if (room) {
-    const player = room.players.find(p => p.username === data.username);
-    if (player) {
-      player.points += data.points;
-      room.scores.push({ username: data.username, points: player.points });
+  if (!room) {
+    console.log(`Room not found: ${data.roomId}`);
+    sendError(ws, 'Room not found');
+    return;
+  }
+  
+  const player = room.players.find(p => p.username === data.username);
+  if (!player) {
+    console.log(`Player not found: ${data.username}`);
+    sendError(ws, 'Player not found');
+    return;
+  }
+  
+  player.points += data.points;
+  room.scores.push({ username: data.username, points: player.points });
+  
+  console.log(`Room scores after submission:`, room.scores);
 
-      if (room.scores.length === room.players.length) {
-        room.completedRounds++;
-        if (room.completedRounds >= 10) {
-          console.log(`Game over in room ${data.roomId}. Sending leaderboard.`);
-          room.scores.sort((a, b) => b.points - a.points);
-          room.players.forEach(player => {
-            player.ws.send(JSON.stringify({ type: 'leaderboard_update', leaderboard: room.scores }));
-            player.ws.send(JSON.stringify({ type: 'game_over' }));
-          });
-          delete rooms[data.roomId];
-        } else {
-          room.scores = [];
-          room.players.forEach(player => {
-            player.ws.send(JSON.stringify({ type: 'next_round' }));
-          });
-        }
-      }
-    } else {
-      sendError(ws, 'Player not found');
-    }
+  if (room.scores.length === room.players.length) {
+    console.log(`Sending leaderboard for room ${data.roomId}`);
+    room.scores.sort((a, b) => b.points - a.points);
+    room.players.forEach(player => {
+      player.ws.send(JSON.stringify({ type: 'leaderboard_update', leaderboard: room.scores }));
+      player.ws.send(JSON.stringify({ type: 'game_over' }));
+    });
+    delete rooms[data.roomId];
+    console.log(`Room ${data.roomId} deleted after game over.`);
   } else {
-    sendError(ws, 'Room not found or invalid game state');
+    console.log(`Waiting for more scores. Current scores: ${room.scores.length}/${room.players.length}`);
   }
 };
 
+// Mise à jour des joueurs dans la salle
 const updateRoomPlayers = (roomId) => {
   const room = rooms[roomId];
   if (room) {
@@ -150,14 +151,6 @@ const generateRoomId = () => {
 const sendError = (ws, message) => {
   ws.send(JSON.stringify({ type: 'error', message }));
 };
-
-// Serve static files from the "Game/dist" directory
-// app.use(express.static(path.join(__DIRNAME, "Game/dist"))); 
-
-// Serve the frontend's index.html for all other routes
-// app.get("*", (req, res) => { 
-//   res.sendFile(path.join(__DIRNAME, "FRONT", "dist", "index.html"));
-// });
 
 server.listen(8080, () => {
   console.log('Server is listening on port 8080');

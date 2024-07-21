@@ -47,9 +47,7 @@ img {
    
     overflow: hidden;
     background: #123;
-    @include mixin.xs { 
-      background: none;
-    }
+
 
   }
   
