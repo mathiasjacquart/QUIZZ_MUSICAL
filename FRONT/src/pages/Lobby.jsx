@@ -1,42 +1,43 @@
+// Lobby.js
 import React, { useState, useContext, useEffect } from 'react';
 import { UserContext } from '../context/context';
+import { WebSocketContext } from '../context/Websocket'; // Importer le WebSocketContext
 import { useNavigate } from "react-router-dom";
 import styles from "./Lobby.module.scss";
 
-// const socket = new WebSocket('ws://localhost:8080');
-const socket = new WebSocket('https://quizz-musical.onrender.com');
-
-
 export default function Lobby() {
-  const { username, roomId, setRoomId } = useContext(UserContext); // Ajout de roomId et setRoomId
+  const { username, roomId, setRoomId } = useContext(UserContext);
+  const socket = useContext(WebSocketContext); // Utiliser le WebSocket context
   const [players, setPlayers] = useState([]);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
-    socket.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      switch (data.type) {
-        case 'room_created':
-          setRoomId(data.roomId);
-          break;
-        case 'room_joined':
-          setRoomId(data.roomId);
-          break;
-        case 'room_update':
-          setPlayers(data.players);
-          break;
-        case 'game_started':
-          navigate('/countdown');
-          break;
-        case 'error':
-          setError(data.error);
-          break;
-        default:
-          break;
-      }
-    };
-  }, [navigate, setRoomId]);
+    if (socket) {
+      socket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        switch (data.type) {
+          case 'room_created':
+            setRoomId(data.roomId);
+            break;
+          case 'room_joined':
+            setRoomId(data.roomId);
+            break;
+          case 'room_update':
+            setPlayers(data.players);
+            break;
+          case 'game_started':
+            navigate('/countdown');
+            break;
+          case 'error':
+            setError(data.error);
+            break;
+          default:
+            break;
+        }
+      };
+    }
+  }, [navigate, setRoomId, socket]);
 
   const createRoom = () => {
     socket.send(JSON.stringify({ type: 'create_room', username }));
@@ -55,7 +56,7 @@ export default function Lobby() {
   return (
     <div className={`${styles.Lobby}`}>
       <div className={`${styles.center}`}>
-        <h1> Lobby</h1>
+        <h1>Lobby</h1>
         {roomId ? (
           <>
             <h2>Salon ID: {roomId}</h2>

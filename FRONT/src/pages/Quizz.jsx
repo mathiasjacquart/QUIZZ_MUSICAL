@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import styles from './Quizz.module.scss';
 import { UserContext } from '../context/context';
+import { WebSocketContext } from "../context/Websocket";
 import { getSpotifyToken, getPlaylistDetails } from '../../API/spotifyAPI';
-import { useNavigate } from 'react-router-dom'; // Import pour la navigation
-
-const socket = new WebSocket('ws://localhost:8080');
+import { useNavigate } from 'react-router-dom';
 
 export default function Quiz() {
   const { username, roomId } = useContext(UserContext);
+  const socket = useContext(WebSocketContext);
   const [token, setToken] = useState(null);
   const [playlist, setPlaylist] = useState(null);
   const [currentTrack, setCurrentTrack] = useState(null);
@@ -19,12 +19,11 @@ export default function Quiz() {
   const [completedRounds, setCompletedRounds] = useState(0);
   const [points, setPoints] = useState(0);
   const [pointsAwarded, setPointsAwarded] = useState(false);
-
   const [leaderboard, setLeaderboard] = useState([]);
   const [gameOver, setGameOver] = useState(false);
 
   const audioRef = useRef(null);
-  const navigate = useNavigate(); // Hook de navigation
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -40,24 +39,26 @@ export default function Quiz() {
   }, []);
 
   useEffect(() => {
-    socket.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      console.log('Message received:', data);  // Log received message
-      if (data.type === 'leaderboard_update') {
-        setLeaderboard(data.leaderboard);
-      } else if (data.type === 'game_over') {
-        setGameOver(true);
-      } else if (data.type === 'next_round') {
-        startNextRound();
-      }
-    };
-  }, []);
+    if (socket) {
+      socket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        console.log('Message received:', data);
+        if (data.type === 'leaderboard_update') {
+          setLeaderboard(data.leaderboard);
+        } else if (data.type === 'game_over') {
+          setGameOver(true);
+        } else if (data.type === 'next_round') {
+          startNextRound();
+        }
+      };
+    }
+  }, [socket]);
 
   useEffect(() => {
     if (completedRounds === 10) {
       socket.send(JSON.stringify({ type: 'submit_score', roomId, username, points }));
     }
-  }, [completedRounds, points, roomId, username]);
+  }, [completedRounds, points, roomId, username, socket]);
 
   useEffect(() => {
     if (songSeconds > 0) {
@@ -168,12 +169,9 @@ export default function Quiz() {
     setPointsAwarded(false);
     setLeaderboard([]);
     setGameOver(false);
-
-    
-    navigate('/'); 
+    navigate('/');
   };
 
-  console.log();
   return (
     <div className={styles.Quiz}>
       <div className={styles.countdown}>
@@ -253,5 +251,4 @@ export default function Quiz() {
       </div>
     </div>
   );
-  
 }

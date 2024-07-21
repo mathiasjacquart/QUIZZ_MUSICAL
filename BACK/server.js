@@ -2,16 +2,17 @@ const express = require('express');
 const http = require('http');
 const WebSocket = require('ws');
 const path = require("path");
+
 const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
-
-const __DIRNAME = path.resolve();
+// const __DIRNAME = path.resolve();
 
 let rooms = {};
 
 wss.on('connection', (ws) => {
+  console.log("New websocket connection");
   ws.on('message', (message) => {
     try {
       const data = JSON.parse(message);
@@ -30,11 +31,11 @@ wss.on('connection', (ws) => {
           break;
 
         case 'submit_score':
-          handleSubmitScore(ws, data);  // Pass ws to handle errors
+          handleSubmitScore(ws, data);
           break;
 
         case 'game_over':
-          handleGameOver(data.roomId);  
+          handleGameOver(data.roomId);
           break;
 
         default:
@@ -56,13 +57,12 @@ wss.on('connection', (ws) => {
 });
 
 const handleCreateRoom = (ws, data) => {
-  console.log(`Creating room with ID ${roomId} for user ${data.username}`);
   const roomId = generateRoomId();
+  console.log(`Creating room with ID ${roomId} for user ${data.username}`);
   rooms[roomId] = { players: [{ ws, username: data.username, points: 0 }], gameStarted: false, completedRounds: 0, scores: [] };
   ws.send(JSON.stringify({ type: 'room_created', roomId }));
   updateRoomPlayers(roomId);
 };
-
 
 const handleJoinRoom = (ws, data) => {
   console.log(`User ${data.username} joining room ${data.roomId}`);
@@ -151,11 +151,13 @@ const sendError = (ws, message) => {
   ws.send(JSON.stringify({ type: 'error', message }));
 };
 
-app.use(express.static(path.join(__DIRNAME, "Game/dist"))); 
+// Serve static files from the "Game/dist" directory
+// app.use(express.static(path.join(__DIRNAME, "Game/dist"))); 
 
-app.get("*", (req, res) => { 
-  res.sendFile(path.join(__DIRNAME, "FRONT" , "dist" , "index.html"))
-})
+// Serve the frontend's index.html for all other routes
+// app.get("*", (req, res) => { 
+//   res.sendFile(path.join(__DIRNAME, "FRONT", "dist", "index.html"));
+// });
 
 server.listen(8080, () => {
   console.log('Server is listening on port 8080');
