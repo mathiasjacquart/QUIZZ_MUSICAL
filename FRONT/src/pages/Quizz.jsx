@@ -66,7 +66,7 @@ export default function Quiz() {
   }, [completedRounds, points, roomId, username, socket]);
 
   useEffect(() => {
-    if (songSeconds > 0) {
+    if (prepSeconds===0 && songSeconds > 0) {
       const countdown = setInterval(() => {
         setSongSeconds(prevSeconds => prevSeconds - 1);
       }, 1000);
@@ -74,7 +74,7 @@ export default function Quiz() {
     } else {
       handleAnswerSubmission('');
     }
-  }, [songSeconds]);
+  }, [songSeconds, prepSeconds]);
 
   useEffect(() => {
     if (prepSeconds > 0) {
