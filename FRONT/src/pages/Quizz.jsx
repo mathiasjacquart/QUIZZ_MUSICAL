@@ -59,7 +59,9 @@ export default function Quiz() {
     if (completedRounds === 10) {
        console.log('Sending score to server:', { type: 'submit_score', roomId, username, points });
       socket.send(JSON.stringify({ type: 'submit_score', roomId, username, points }));
+      setSongSeconds(0)
       setLoading(true)
+
     }
   }, [completedRounds, points, roomId, username, socket]);
 
@@ -135,7 +137,7 @@ export default function Quiz() {
 
   const startNextRound = () => {
     setPrepSeconds(5);
-    setSongSeconds(30);
+    setSongSeconds(20);
     if (playlist) {
       setCurrentTrack(getValidTrack(playlist.tracks.items));
       setAnswer('');
@@ -203,15 +205,14 @@ export default function Quiz() {
       <div className={styles.center}>
         {prepSeconds > 0 ? (
           <div className={styles.prep}>
-            <p >Préparez-vous</p>
+            <p >Préparez-toi ${username} !</p>
             <p>{prepSeconds}</p>
           </div>
         ) : (
           <>
             {songSeconds > 0 ? (
               <>
-                {!loading ? (    
-                <>
+
                 <div className={styles.countdown}>
                     <p>{songSeconds}</p>
                 </div> 
@@ -231,6 +232,7 @@ export default function Quiz() {
                                   <form onSubmit={handleSubmit}>
                                     <label htmlFor="Answer">Saisissez l'artiste ou le titre de la chanson :</label>
                                     <input
+                                      autoFocus
                                       type="text"
                                       value={answer}
                                       onChange={(e) => setAnswer(e.target.value)}
@@ -240,17 +242,6 @@ export default function Quiz() {
                                   </form>
                                   <div className={styles.message}>{message && <p>{message}</p>}</div>                
                 </>
-
-                ) : (
-                  <div>
-                  <svg className={styles.loading} viewBox="25 25 50 50">
-                    <circle r="20" cy="50" cx="50"></circle>
-                  </svg>
-                  <p>Chargement des scores...</p>
-                </div>
-                )}   
-
-              </>
             ) : (
               <>
                 {completedRounds < 10 ? (
@@ -272,7 +263,13 @@ export default function Quiz() {
                         )}
                       </div>
                     ) : (
-                      <p>Erreur : Le jeu semble avoir terminé, mais l'état n'est pas mis à jour correctement.</p>
+                      <div>
+                      <svg className={styles.loading} viewBox="25 25 50 50">
+                      <circle r="20" cy="50" cx="50"></circle>
+                    </svg>
+                    <p>En attente des scores des autres joueurs...</p>
+                      </div>
+
                     )}
                   </>
                 )}

@@ -27,7 +27,7 @@ export default function Lobby() {
             setPlayers(data.players);
             break;
           case 'game_started':
-            navigate('/countdown');
+            navigate('/quizz');
             break;
           case 'error':
             setError(data.error);
