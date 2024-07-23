@@ -6,6 +6,7 @@ export const WebSocketProvider = ({ children }) => {
   
     useEffect(() => {
       const newSocket = new WebSocket('https://quizz-musical.onrender.com');
+      // const newSocket = new WebSocket('http://localhost:8080');
       setSocket(newSocket);
   
       return () => newSocket.close(); 

@@ -11,15 +11,16 @@ export default function Quiz() {
   const [token, setToken] = useState(null);
   const [playlist, setPlaylist] = useState(null);
   const [currentTrack, setCurrentTrack] = useState(null);
-  const [songSeconds, setSongSeconds] = useState(25);
+  const [songSeconds, setSongSeconds] = useState(20);
   const [prepSeconds, setPrepSeconds] = useState(5);
   const [round, setRound] = useState(1);
   const [answer, setAnswer] = useState('');
   const [message, setMessage] = useState('');
-  const [completedRounds, setCompletedRounds] = useState(1);
+  const [completedRounds, setCompletedRounds] = useState(9);
   const [points, setPoints] = useState(0);
   const [pointsAwarded, setPointsAwarded] = useState(false);
   const [leaderboard, setLeaderboard] = useState([]);
+  const [loading, setLoading] = useState(false)
   const [gameOver, setGameOver] = useState(false);
 
   const audioRef = useRef(null);
@@ -58,6 +59,7 @@ export default function Quiz() {
     if (completedRounds === 10) {
        console.log('Sending score to server:', { type: 'submit_score', roomId, username, points });
       socket.send(JSON.stringify({ type: 'submit_score', roomId, username, points }));
+      setLoading(true)
     }
   }, [completedRounds, points, roomId, username, socket]);
 
@@ -144,7 +146,13 @@ export default function Quiz() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    handleAnswerSubmission(answer);
+    if (completedRounds < 10) { 
+      handleAnswerSubmission(answer);
+    } else { 
+      handleAnswerSubmission(answer)
+     
+    }
+   
   };
   console.log(roomId);
   const handleAnswerSubmission = (answer) => {
@@ -165,7 +173,7 @@ export default function Quiz() {
       setTimeout(() => {
         setCompletedRounds(prevRounds => prevRounds + 1);
       }, 2000);
-    } else if (answer === "") {
+    } else {
       setMessage(`Il fallait te dépêcher ${username}, c'était ${currentTrack.name} de ${currentTrack.artists[0].name}`);
       setTimeout(() => {
         setCompletedRounds(prevRounds => prevRounds + 1);
@@ -202,32 +210,46 @@ export default function Quiz() {
           <>
             {songSeconds > 0 ? (
               <>
-                   <div className={styles.countdown}>
-        <p>{songSeconds}</p>
-      </div>
-                {currentTrack && (
+                {!loading ? (    
+                <>
+                <div className={styles.countdown}>
+                    <p>{songSeconds}</p>
+                </div> 
+
+                                  {currentTrack && (
+                                    <div>
+                                      <div className={styles.manche}>
+                                        <p>Manche {round}</p>
+                                      </div>
+                                      <div>
+                                        <audio ref={audioRef} autoPlay>
+                                          <source src={currentTrack.preview_url} type="audio/mpeg" />
+                                        </audio>
+                                      </div>
+                                    </div>
+                                  )}
+                                  <form onSubmit={handleSubmit}>
+                                    <label htmlFor="Answer">Saisissez l'artiste ou le titre de la chanson :</label>
+                                    <input
+                                      type="text"
+                                      value={answer}
+                                      onChange={(e) => setAnswer(e.target.value)}
+                                      placeholder="Entrez l'artiste ou le titre"
+                                    />
+                                    <button className='btn-primary' type="submit">Envoyer</button>
+                                  </form>
+                                  <div className={styles.message}>{message && <p>{message}</p>}</div>                
+                </>
+
+                ) : (
                   <div>
-                    <div className={styles.manche}>
-                      <p>Manche {round}</p>
-                    </div>
-                    <div>
-                      <audio ref={audioRef} autoPlay>
-                        <source src={currentTrack.preview_url} type="audio/mpeg" />
-                      </audio>
-                    </div>
-                  </div>
-                )}
-                <form onSubmit={handleSubmit}>
-                  <label htmlFor="Answer">Saisissez l'artiste ou le titre de la chanson :</label>
-                  <input
-                    type="text"
-                    value={answer}
-                    onChange={(e) => setAnswer(e.target.value)}
-                    placeholder="Entrez l'artiste ou le titre"
-                  />
-                  <button className='btn-primary' type="submit">Envoyer</button>
-                </form>
-                <div className={styles.message}>{message && <p>{message}</p>}</div>
+                  <svg className={styles.loading} viewBox="25 25 50 50">
+                    <circle r="20" cy="50" cx="50"></circle>
+                  </svg>
+                  <p>Chargement des scores...</p>
+                </div>
+                )}   
+
               </>
             ) : (
               <>

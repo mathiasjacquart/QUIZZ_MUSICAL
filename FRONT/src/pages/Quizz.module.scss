@@ -91,7 +91,42 @@
         padding: 0px 30px;}
         margin-top: 100px;
       text-align: center;
-      
+      .loading { 
+        width: 3.25em;
+        transform-origin: center;
+        animation: rotate4 2s linear infinite;
+        circle{ 
+          fill: none;
+          stroke: hsl(214, 97%, 59%);
+          stroke-width: 2;
+          stroke-dasharray: 1, 200;
+          stroke-dashoffset: 0;
+          stroke-linecap: round;
+          animation: dash4 1.5s ease-in-out infinite;
+        }
+        @keyframes rotate4 {
+          100% {
+           transform: rotate(360deg);
+          }
+         }
+         
+         @keyframes dash4 {
+          0% {
+           stroke-dasharray: 1, 200;
+           stroke-dashoffset: 0;
+          }
+         
+          50% {
+           stroke-dasharray: 90, 200;
+           stroke-dashoffset: -35px;
+          }
+         
+          100% {
+           stroke-dashoffset: -125px;
+          }
+         }
+         
+      }
       .prep { 
         p { 
           font-size: 30px;
@@ -113,7 +148,7 @@
           margin-bottom: 30px;
           @include mixin.xs { 
             width: 300px;
-            margin-top: -170px;
+            margin-top: -160px;
             padding: 10px 0px;
             margin-bottom: 30px;
         }
