@@ -38,7 +38,7 @@ export default function Quiz() {
     };
     fetchData();
   }, []);
-a
+
   useEffect(() => {
     if (socket) {
       socket.onmessage = (event) => {
