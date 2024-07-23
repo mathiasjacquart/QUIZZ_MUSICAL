@@ -38,7 +38,7 @@ export default function Quiz() {
     };
     fetchData();
   }, []);
-
+    console.log(playlist);
   useEffect(() => {
     if (socket) {
       socket.onmessage = (event) => {
@@ -66,7 +66,7 @@ export default function Quiz() {
   }, [completedRounds, points, roomId, username, socket]);
 
   useEffect(() => {
-    if (prepSeconds===0 && songSeconds > 0) {
+    if (songSeconds > 0) {
       const countdown = setInterval(() => {
         setSongSeconds(prevSeconds => prevSeconds - 1);
       }, 1000);
@@ -74,7 +74,7 @@ export default function Quiz() {
     } else {
       handleAnswerSubmission('');
     }
-  }, [songSeconds, prepSeconds]);
+  }, [songSeconds]);
 
   useEffect(() => {
     if (prepSeconds > 0) {
@@ -156,7 +156,7 @@ export default function Quiz() {
     }
    
   };
-
+  console.log(roomId);
   const handleAnswerSubmission = (answer) => {
     if (currentTrack) {
       const normalizedAnswer = normalizeString(answer);
@@ -192,7 +192,7 @@ export default function Quiz() {
     setRoomId("")
     navigate('/');
   };
-
+    console.log(completedRounds);
   return (
     <div className={styles.Quiz}>
  
