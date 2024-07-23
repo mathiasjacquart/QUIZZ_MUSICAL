@@ -152,6 +152,14 @@ const sendError = (ws, message) => {
   ws.send(JSON.stringify({ type: 'error', message }));
 };
 
+
+const __DIRNAME = path.resolve();
+
+app.use(express.static(path.join(__DIRNAME, "FRONT/dist")));
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__DIRNAME, "FRONT", "dist", "index.html"));
+});
+
 server.listen(8080, () => {
   console.log('Server is listening on port 8080');
 });
