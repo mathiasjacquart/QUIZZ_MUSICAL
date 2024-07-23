@@ -38,7 +38,7 @@ export default function Quiz() {
     };
     fetchData();
   }, []);
-
+    console.log(playlist);
   useEffect(() => {
     if (socket) {
       socket.onmessage = (event) => {
@@ -156,7 +156,7 @@ export default function Quiz() {
     }
    
   };
-  console.log(roomId);
+
   const handleAnswerSubmission = (answer) => {
     if (currentTrack) {
       const normalizedAnswer = normalizeString(answer);
@@ -192,7 +192,7 @@ export default function Quiz() {
     setRoomId("")
     navigate('/');
   };
-  console.log(completedRounds);
+
   return (
     <div className={styles.Quiz}>
  
@@ -205,7 +205,7 @@ export default function Quiz() {
       <div className={styles.center}>
         {prepSeconds > 0 ? (
           <div className={styles.prep}>
-            <p >Préparez-toi ${username} !</p>
+            <p >Prépares-toi {username} !</p>
             <p>{prepSeconds}</p>
           </div>
         ) : (
@@ -267,7 +267,7 @@ export default function Quiz() {
                       <svg className={styles.loading} viewBox="25 25 50 50">
                       <circle r="20" cy="50" cx="50"></circle>
                     </svg>
-                    <p>En attente des scores des autres joueurs...</p>
+                    <p className={styles.loadingText}>En attente des scores des autres joueurs...</p>
                       </div>
 
                     )}
