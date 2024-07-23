@@ -5,7 +5,7 @@ export const WebSocketProvider = ({ children }) => {
     const [socket, setSocket] = useState(null);
   
     useEffect(() => {
-      const newSocket = new WebSocket('https://quizz-musical.onrender.com');
+      const newSocket = new WebSocket('http://quizz-musical.onrender.com');
       setSocket(newSocket);
   
       return () => newSocket.close(); 

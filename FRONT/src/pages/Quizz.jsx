@@ -104,22 +104,31 @@ export default function Quiz() {
 
   const getValidTrack = (tracks) => {
     let validTrack = null;
-    while (!validTrack) {
-      const randomTrack = getRandomTrack(tracks);
-      if (randomTrack.preview_url) {
-        validTrack = randomTrack;
+    const shuffledTracks = shuffleArray(tracks);
+    for (const trackItem of shuffledTracks) {
+      const track = trackItem.track;
+      if (track.preview_url) {
+        validTrack = track;
+        break;
       }
     }
     return validTrack;
   };
 
-  const getRandomTrack = (tracks) => {
-    const randomIndex = Math.floor(Math.random() * tracks.length);
-    return tracks[randomIndex].track;
+  const shuffleArray = (array) => {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
   };
 
   const normalizeString = (str) => {
-    return str.toLowerCase().replace(/[\s\W]/g, '');
+    return str
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') 
+      .replace(/[\s\W]/g, '');
   };
 
   const startNextRound = () => {
