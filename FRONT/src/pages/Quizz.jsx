@@ -16,7 +16,7 @@ export default function Quiz() {
   const [round, setRound] = useState(1);
   const [answer, setAnswer] = useState('');
   const [message, setMessage] = useState('');
-  const [completedRounds, setCompletedRounds] = useState(9);
+  const [completedRounds, setCompletedRounds] = useState(0);
   const [points, setPoints] = useState(0);
   const [pointsAwarded, setPointsAwarded] = useState(false);
   const [leaderboard, setLeaderboard] = useState([]);
