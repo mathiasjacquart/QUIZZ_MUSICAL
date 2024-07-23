@@ -17,7 +17,7 @@
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    background-color: #fff;
+    // background-color: #fff;
     border-radius: 10px; 
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     @include mixin.xs { 
@@ -52,7 +52,7 @@
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
       transition: ease-in 1ms;
       @include mixin.xs { 
-        font-size: 30px;
+        font-size: 60px;
     }
     }
     .start {

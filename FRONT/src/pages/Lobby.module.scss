@@ -16,16 +16,24 @@
         justify-content: center;
         align-items: center;
         flex-direction: column;
-        background-color: #fff; /* Couleur de fond de la boîte du quiz */
-        border-radius: 10px; /* Bordures arrondies */
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Ombre pour un effet de profondeur */
+        background-color: #fff; 
+        border-radius: 10px; //
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         @include mixin.xs { 
           width: 300px;
           }
         text-align: center;
+        .container { 
+          width: 100%;
+          padding: 00px 50px;
+          ul { 
+            text-align: left;
+          }
+        }
         h1 { 
           width: 100%;
           background-color: var(--primary) !important;
+          font-weight: 500;
           font-size: 30px;
           text-align: center;
           padding: 14px 0px;
@@ -37,11 +45,12 @@
     
             @include mixin.xs { 
                font-size: 30px;
-               margin-top: -70px;
+               margin-top: -85px;
                margin-bottom: 20px;
 
             }
-            
+        
+
             
         }
         p {
@@ -55,6 +64,7 @@
           h2 {
             font-size: 30px;
             margin: 10px 0;
+            
             color: var(--primary);
             @include mixin.xs { 
              font-size: 20px;
@@ -63,6 +73,8 @@
           }
           h3 {
             font-size: 30px;
+            text-align: left;
+            font-weight: 200;
             margin: 0px 0;
             color: var(--primary);
             @include mixin.xs { 
@@ -74,10 +86,12 @@
             width: 300px;
             padding: 10px;
             font-size: 1rem;
-            
+            margin: 10px 0px;
             border-radius: 5px;
             border: 1px solid #ccc;
-            
+            &:focus-visible{ 
+              outline: 1px solid var(--primary);
+          }
             @include mixin.xs { 
               width: 200px;
           }
@@ -89,7 +103,7 @@
           }
           button{
             width: 300px;
-            margin-top: 15px;
+            margin: 15px 0px;
             @include mixin.xs { 
                 width: 200px;
             }

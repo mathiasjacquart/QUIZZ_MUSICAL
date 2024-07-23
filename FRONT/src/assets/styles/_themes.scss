@@ -1,3 +1,4 @@
+@use "./mixins" as mixin;
 .btn {
   padding: 8px 15px;
   border-radius: 20px;
@@ -15,7 +16,10 @@
   border-radius: 10px;
   cursor: pointer;
   transition: 0.2s opacity;
-
+  padding: 8px 0px;
+  @include mixin.xs { 
+    width: 240px;
+}
   &:hover {
     opacity: 0.8;
   }

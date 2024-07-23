@@ -6,17 +6,17 @@ import { getSpotifyToken, getPlaylistDetails } from '../../API/spotifyAPI';
 import { useNavigate } from 'react-router-dom';
 
 export default function Quiz() {
-  const { username, roomId } = useContext(UserContext);
+  const { username, roomId, setRoomId } = useContext(UserContext);
   const socket = useContext(WebSocketContext);
   const [token, setToken] = useState(null);
   const [playlist, setPlaylist] = useState(null);
   const [currentTrack, setCurrentTrack] = useState(null);
-  const [songSeconds, setSongSeconds] = useState(30);
+  const [songSeconds, setSongSeconds] = useState(25);
   const [prepSeconds, setPrepSeconds] = useState(5);
   const [round, setRound] = useState(1);
   const [answer, setAnswer] = useState('');
   const [message, setMessage] = useState('');
-  const [completedRounds, setCompletedRounds] = useState(9);
+  const [completedRounds, setCompletedRounds] = useState(1);
   const [points, setPoints] = useState(0);
   const [pointsAwarded, setPointsAwarded] = useState(false);
   const [leaderboard, setLeaderboard] = useState([]);
@@ -30,7 +30,7 @@ export default function Quiz() {
       const token = await getSpotifyToken();
       setToken(token);
       if (token) {
-        const playlist = await getPlaylistDetails('1GBxxzPyw5XhyFzIMpCBgD', token);
+        const playlist = await getPlaylistDetails('2GPzX5QjVqGAgXYxPHEtGW', token);
         setPlaylist(playlist);
         setCurrentTrack(getValidTrack(playlist.tracks.items));
       }
@@ -137,7 +137,7 @@ export default function Quiz() {
     e.preventDefault();
     handleAnswerSubmission(answer);
   };
-
+  console.log(roomId);
   const handleAnswerSubmission = (answer) => {
     if (currentTrack) {
       const normalizedAnswer = normalizeString(answer);
@@ -150,14 +150,14 @@ export default function Quiz() {
         setPoints(prevPoints => prevPoints + pointsEarned);
         setMessage(`T'es trop fort ${username} ! ${pointsEarned} points pour Griffondor.`);
       } else {
-        setMessage(`T'as de la merde dans les oreilles ou quoi ${username}, c'était ${currentTrack.name} par ${currentTrack.artists[0].name}`);
+        setMessage(`Eh non ${username} ! C'était ${currentTrack.name} de ${currentTrack.artists[0].name}`);
       }
 
       setTimeout(() => {
         setCompletedRounds(prevRounds => prevRounds + 1);
       }, 2000);
     } else if (answer === "") {
-      setMessage(`Il fallait te dépêcher ${username}, c'était ${currentTrack.name} par ${currentTrack.artists[0].name}`);
+      setMessage(`Il fallait te dépêcher ${username}, c'était ${currentTrack.name} de ${currentTrack.artists[0].name}`);
       setTimeout(() => {
         setCompletedRounds(prevRounds => prevRounds + 1);
       }, 2000);
@@ -170,14 +170,13 @@ export default function Quiz() {
     setPointsAwarded(false);
     setLeaderboard([]);
     setGameOver(false);
+    setRoomId("")
     navigate('/');
   };
   console.log(completedRounds);
   return (
     <div className={styles.Quiz}>
-      <div className={styles.countdown}>
-        <p>{songSeconds}</p>
-      </div>
+ 
       <div className={styles.points}>
         <div className='d-flex flex-column center'>
           <p>Points</p>
@@ -186,14 +185,17 @@ export default function Quiz() {
       </div>
       <div className={styles.center}>
         {prepSeconds > 0 ? (
-          <>
-            <p>Préparez-vous</p>
+          <div className={styles.prep}>
+            <p >Préparez-vous</p>
             <p>{prepSeconds}</p>
-          </>
+          </div>
         ) : (
           <>
             {songSeconds > 0 ? (
               <>
+                   <div className={styles.countdown}>
+        <p>{songSeconds}</p>
+      </div>
                 {currentTrack && (
                   <div>
                     <div className={styles.manche}>
@@ -226,16 +228,14 @@ export default function Quiz() {
                   <>
                     {gameOver ? (
                       <div>
-                        <p className={styles.endQuizz}>Quiz terminé!</p>
-                        <p className={styles.endQuizz}>Vous avez accumulé un total de {points} points.</p>
-                        {gameOver && (
-                          <div>
+                         {gameOver && (
+                          <div className={styles.leaderboard}>
                             <h3>Classement Final</h3>
-                            <ul>
+                            <ol >
                               {leaderboard.map((player, index) => (
-                                <li key={index}> {player.username}: {player.points} points</li>
+                                <li  className={styles.scores} key={index}> {player.username}: {player.points} points</li>
                               ))}
-                            </ul>
+                            </ol>
                             <button onClick={handleNewGame} className="btn-primary">Nouvelle Partie</button>
                           </div>
                         )}

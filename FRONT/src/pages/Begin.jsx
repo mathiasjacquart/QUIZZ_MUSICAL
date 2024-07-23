@@ -24,7 +24,7 @@ export default function Begin() {
     <div className='mwFull mhFull d-flex justify-content-center align-items-center'>
       <div className={`${styles.Begin}`}>
         <h1>Bienvenue à l'Examen Aveugle</h1>
-        <div className={``}>
+        <div className={styles.container}>
           <form onSubmit={handleSubmit}>
             <label htmlFor="username">Choisis ton pseudo :</label>
             <input id="username" type="text" placeholder="oui, oui, t'as bien lu, ton pseudo." />
