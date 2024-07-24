@@ -6,26 +6,43 @@ import { getSpotifyToken, getPlaylistDetails } from '../../API/spotifyAPI';
 import { useNavigate } from 'react-router-dom';
 
 export default function Quiz() {
+  // récupération des usernames, rooms, socket du context
   const { username, roomId, setRoomId } = useContext(UserContext);
   const socket = useContext(WebSocketContext);
+
+
   const [token, setToken] = useState(null);
+  // récupération de la playlist
   const [playlist, setPlaylist] = useState(null);
+  // récupération de la chanson actuelle
   const [currentTrack, setCurrentTrack] = useState(null);
+
+  // compteur préparation d'une manche et durée d'une manche
   const [songSeconds, setSongSeconds] = useState(20);
   const [prepSeconds, setPrepSeconds] = useState(5);
+
+  // round pour affichage de la manche
   const [round, setRound] = useState(1);
+  // round terminé car envoie de réponse
+  const [completedRounds, setCompletedRounds] = useState(9);
+  // récupération de la réponse user
   const [answer, setAnswer] = useState('');
+  // feedback user
   const [message, setMessage] = useState('');
-  const [completedRounds, setCompletedRounds] = useState(0);
+  // récupération - stockage des points 
   const [points, setPoints] = useState(0);
+  
+  //récupération
   const [pointsAwarded, setPointsAwarded] = useState(false);
+  // récupération du classement final des joueurs
   const [leaderboard, setLeaderboard] = useState([]);
-  const [loading, setLoading] = useState(false)
+// condition pour la ternaire affichage classement 
   const [gameOver, setGameOver] = useState(false);
 
   const audioRef = useRef(null);
   const navigate = useNavigate();
 
+  // fetch de la playlist BLIND TEST
   useEffect(() => {
     const fetchData = async () => {
       const token = await getSpotifyToken();
@@ -38,7 +55,9 @@ export default function Quiz() {
     };
     fetchData();
   }, []);
-    console.log(playlist);
+
+
+  // écoute des messages reçus via le web sockets et stockage dans useState
   useEffect(() => {
     if (socket) {
       socket.onmessage = (event) => {
@@ -55,16 +74,28 @@ export default function Quiz() {
     }
   }, [socket]);
 
+  // envoie des scores et reset de la durée de la manche pour arriver à la page des scores
   useEffect(() => {
     if (completedRounds === 10) {
        console.log('Sending score to server:', { type: 'submit_score', roomId, username, points });
       socket.send(JSON.stringify({ type: 'submit_score', roomId, username, points }));
       setSongSeconds(0)
-      setLoading(true)
 
     }
   }, [completedRounds, points, roomId, username, socket]);
 
+// timer préparation de la manche
+
+  useEffect(() => {
+    if (prepSeconds > 0) {
+      const countdown = setInterval(() => {
+        setPrepSeconds(prevSeconds => prevSeconds - 1);
+      }, 1000);
+      return () => clearInterval(countdown);
+    }
+  }, [prepSeconds]);
+
+  // timer durée de la manche
   useEffect(() => {
     if (songSeconds > 0) {
       const countdown = setInterval(() => {
@@ -76,21 +107,27 @@ export default function Quiz() {
     }
   }, [songSeconds]);
 
-  useEffect(() => {
-    if (prepSeconds > 0) {
-      const countdown = setInterval(() => {
-        setPrepSeconds(prevSeconds => prevSeconds - 1);
-      }, 1000);
-      return () => clearInterval(countdown);
-    }
-  }, [prepSeconds]);
-
+  // reset des paramètres pour chaque manche
   useEffect(() => {
     if (completedRounds > 0 && completedRounds < 10) {
       startNextRound();
     }
   }, [completedRounds]);
 
+  const startNextRound = () => {
+    setPrepSeconds(5);
+    setSongSeconds(20);
+    if (playlist) {
+      setCurrentTrack(getValidTrack(playlist.tracks.items));
+      setAnswer('');
+      setMessage('');
+      // callback pour ajouter au précédent chiffre
+      setRound(prevRound => prevRound + 1);
+    }
+  };
+
+
+  // gestion d'erreur de la chanson jouée 
   useEffect(() => {
     if (currentTrack && audioRef.current) {
       playAudio(currentTrack);
@@ -105,7 +142,7 @@ export default function Quiz() {
       });
     }
   };
-
+  // 
   const getValidTrack = (tracks) => {
     let validTrack = null;
     const shuffledTracks = shuffleArray(tracks);
@@ -118,7 +155,7 @@ export default function Quiz() {
     }
     return validTrack;
   };
-
+   // fonction sélection aléatoire d'un tableau (playlist)
   const shuffleArray = (array) => {
     for (let i = array.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -127,54 +164,42 @@ export default function Quiz() {
     return array;
   };
 
+  // normalisation de la réponse utilisateur
+
   const normalizeString = (str) => {
     return str
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '') 
-      .replace(/[\s\W]/g, '');
+      .toLowerCase() // minuscule
+      .normalize('NFD') // normalisation NFD
+      .replace(/[\u0300-\u036f]/g, '') // supprimer les accents
+      .replace(/[\s\W]/g, ''); // supprimer les espaces 
   };
 
-  const startNextRound = () => {
-    setPrepSeconds(5);
-    setSongSeconds(20);
-    if (playlist) {
-      setCurrentTrack(getValidTrack(playlist.tracks.items));
-      setAnswer('');
-      setMessage('');
-      setRound(prevRound => prevRound + 1);
-    }
-  };
 
+  // fonction bouton de la soumission
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (completedRounds < 10) { 
-      handleAnswerSubmission(answer);
-    } else { 
-      handleAnswerSubmission(answer)
-     
-    }
-   
+    handleAnswerSubmission(answer);
   };
-  console.log(roomId);
+  // fonction soumission de la réponse 
   const handleAnswerSubmission = (answer) => {
     if (currentTrack) {
       const normalizedAnswer = normalizeString(answer);
       const normalizedTitle = normalizeString(currentTrack.name);
       const normalizedArtist = normalizeString(currentTrack.artists[0].name);
-
+      // bonne réponse
       if (normalizedAnswer === normalizedTitle || normalizedAnswer === normalizedArtist) {
         const pointsEarned = songSeconds * 7;
         setPointsAwarded(true);
         setPoints(prevPoints => prevPoints + pointsEarned);
         setMessage(`T'es trop fort ${username} ! ${pointsEarned} points pour Griffondor.`);
+        // mauvais réponse
       } else {
         setMessage(`Eh non ${username} ! C'était ${currentTrack.name} de ${currentTrack.artists[0].name}`);
+        setTimeout(() => {
+          setCompletedRounds(prevRounds => prevRounds + 1);
+        }, 2000);
       }
-
-      setTimeout(() => {
-        setCompletedRounds(prevRounds => prevRounds + 1);
-      }, 2000);
+      // pas de réponse
     } else {
       setMessage(`Il fallait te dépêcher ${username}, c'était ${currentTrack.name} de ${currentTrack.artists[0].name}`);
       setTimeout(() => {
@@ -182,7 +207,7 @@ export default function Quiz() {
       }, 2000);
     }
   };
-
+  // bouton nouvelle partie - reset des paramètres
   const handleNewGame = () => {
     setCompletedRounds(0);
     setPoints(0);
@@ -194,6 +219,7 @@ export default function Quiz() {
   };
     console.log(completedRounds);
   return (
+
     <div className={styles.Quiz}>
  
       <div className={styles.points}>

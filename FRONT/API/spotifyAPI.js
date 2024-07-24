@@ -36,6 +36,7 @@ export const getPlaylistDetails = async (playlistId, token) => {
 
   if (response.ok) {
     const playlist = await response.json();
+    // FILTRE LES PREVIEWS_URL NULLES POUR OBTENIR DES URLS FONCTIONNABLES
     playlist.tracks.items = playlist.tracks.items.filter(item => item.track.preview_url);
     return playlist;
   } else {

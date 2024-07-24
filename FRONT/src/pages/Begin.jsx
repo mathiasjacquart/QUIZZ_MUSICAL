@@ -5,9 +5,11 @@ import styles from "./Begin.module.scss"
 
 export default function Begin() {
   const navigate = useNavigate();
+  // enregistrement username dans context
   const { setUsername } = useContext(UserContext);
-
+// feedback pour le pseudo
   const [message, setMessage] = useState("")
+  // envoi du pseudo
   const handleSubmit = (event) => {
     event.preventDefault();
     if (event.target.elements.username.value === "") {

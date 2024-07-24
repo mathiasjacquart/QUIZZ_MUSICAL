@@ -3,12 +3,15 @@ const http = require('http');
 const WebSocket = require('ws');
 const path = require("path");
 
+// creation d'un serveur express
 const app = express();
+
 const server = http.createServer(app);
+// creation d'un webscoket sur le serveur express
 const wss = new WebSocket.Server({ server });
 
 let rooms = {};
-
+// écoute des connexions au websockets
 wss.on('connection', (ws) => {
   console.log("New websocket connection");
   ws.on('message', (message) => {
@@ -54,6 +57,7 @@ wss.on('connection', (ws) => {
   });
 });
 
+// création d'une room avec les différents paramètres du joueur
 const handleCreateRoom = (ws, data) => {
   const roomId = generateRoomId();
   console.log(`Creating room with ID ${roomId} for user ${data.username}`);
@@ -61,6 +65,7 @@ const handleCreateRoom = (ws, data) => {
   ws.send(JSON.stringify({ type: 'room_created', roomId }));
   updateRoomPlayers(roomId);
 };
+
 
 const handleJoinRoom = (ws, data) => {
   console.log(`User ${data.username} joining room ${data.roomId}`);
@@ -85,23 +90,25 @@ const handleStartGame = (data) => {
   }
 };
 
+// fonction soumission du score
 const handleSubmitScore = (ws, data) => {
   console.log(`Submitting score for user ${data.username} in room ${data.roomId}`);
-  
+  // gestion d'erreur si room il y a
   const room = rooms[data.roomId];
   if (!room) {
     console.log(`Room not found: ${data.roomId}`);
     sendError(ws, 'Room not found');
     return;
   }
-  
+    // gestion d'erreur si player il y a
+
   const player = room.players.find(p => p.username === data.username);
   if (!player) {
     console.log(`Player not found: ${data.username}`);
     sendError(ws, 'Player not found');
     return;
   }
-  
+  // ajout des points en front dans l'objet player du ws
   player.points += data.points;
   room.scores.push({ username: data.username, points: player.points });
   
@@ -121,7 +128,7 @@ const handleSubmitScore = (ws, data) => {
   }
 };
 
-// Mise à jour des joueurs dans la salle
+// Mise à jour des joueurs dans la salle pour mettre à jour le salon dès qu'un joueur entre
 const updateRoomPlayers = (roomId) => {
   const room = rooms[roomId];
   if (room) {

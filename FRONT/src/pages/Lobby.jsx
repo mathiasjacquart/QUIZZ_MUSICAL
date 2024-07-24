@@ -1,16 +1,19 @@
 // Lobby.js
 import React, { useState, useContext, useEffect } from 'react';
 import { UserContext } from '../context/context';
-import { WebSocketContext } from '../context/Websocket'; // Importer le WebSocketContext
+import { WebSocketContext } from '../context/Websocket'; 
 import { useNavigate } from "react-router-dom";
 import styles from "./Lobby.module.scss";
 
 export default function Lobby() {
   const { username, roomId, setRoomId } = useContext(UserContext);
-  const socket = useContext(WebSocketContext); // Utiliser le WebSocket context
+  const socket = useContext(WebSocketContext); 
+
   const [players, setPlayers] = useState([]);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+
+  // écoute des messages reçus via le web sockets et stockage dans useState
 
   useEffect(() => {
     if (socket) {
@@ -39,14 +42,16 @@ export default function Lobby() {
     }
   }, [navigate, setRoomId, socket]);
 
+// création room et écoute ws pour la création de room
   const createRoom = () => {
     socket.send(JSON.stringify({ type: 'create_room', username }));
   };
+// rejoindre room et écoute ws pour rejoindre une room
 
   const joinRoom = (roomId) => {
     socket.send(JSON.stringify({ type: 'join_room', roomId, username }));
   };
-
+// commencer une game  et écoute ws pour start une game
   const startGame = () => {
     if (roomId) {
       socket.send(JSON.stringify({ type: 'start_game', roomId }));

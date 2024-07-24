@@ -92,7 +92,7 @@
         margin-top: 100px;
       text-align: center;
       .loading { 
-        width: 3.25em;
+        width: 2.25em;
         transform-origin: center;
         animation: rotate4 2s linear infinite;
         circle{ 
@@ -104,13 +104,15 @@
           stroke-linecap: round;
           animation: dash4 1.5s ease-in-out infinite;
         }
-      .loadingText { 
-        font-size: 30px;      
-        @include mixin.xs { 
-        font-size: 20px;
-      }
+
 
       }
+      .loadingText { 
+        font-size: 30px !important;      
+        @include mixin.xs { 
+        font-size: 20px !important;
+      }
+
         @keyframes rotate4 {
           100% {
            transform: rotate(360deg);
