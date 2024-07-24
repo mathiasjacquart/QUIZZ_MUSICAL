@@ -217,7 +217,7 @@ export default function Quiz() {
     setRoomId("")
     navigate('/');
   };
-    console.log(completedRounds);
+    // console.log(completedRounds);
   return (
 
     <div className={styles.Quiz}>
