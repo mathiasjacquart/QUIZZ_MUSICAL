@@ -18,13 +18,13 @@ export default function Quiz() {
   const [currentTrack, setCurrentTrack] = useState(null);
 
   // compteur préparation d'une manche et durée d'une manche
-  const [songSeconds, setSongSeconds] = useState(20);
+  const [songSeconds, setSongSeconds] = useState(25);
   const [prepSeconds, setPrepSeconds] = useState(5);
 
   // round pour affichage de la manche
   const [round, setRound] = useState(1);
   // round terminé car envoie de réponse
-  const [completedRounds, setCompletedRounds] = useState(9);
+  const [completedRounds, setCompletedRounds] = useState(0);
   // récupération de la réponse user
   const [answer, setAnswer] = useState('');
   // feedback user
