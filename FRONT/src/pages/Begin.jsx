@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import { useContext, useState } from 'react';
 import { UserContext } from '../context/context';
 import { useNavigate } from "react-router-dom";
 import styles from "./Begin.module.scss"
@@ -25,7 +25,7 @@ export default function Begin() {
   return (
     <div className='mwFull mhFull d-flex justify-content-center align-items-center'>
       <div className={`${styles.Begin}`}>
-        <h1>Bienvenue à l'Examen Aveugle</h1>
+        <h1>Bienvenue à l`&apos;Examen Aveugle</h1>
         <div className={styles.container}>
           <form onSubmit={handleSubmit}>
             <label htmlFor="username">Choisis ton pseudo :</label>

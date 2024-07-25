@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useRef } from 'react';
+import  { useState, useEffect, useContext, useRef } from 'react';
 import styles from './Quizz.module.scss';
 import { UserContext } from '../context/context';
 import { WebSocketContext } from "../context/Websocket";
@@ -32,8 +32,10 @@ export default function Quiz() {
   // récupération - stockage des points 
   const [points, setPoints] = useState(0);
   
-  //récupération
-  const [pointsAwarded, setPointsAwarded] = useState(false);
+  //récupération des tracks déjà joués pour par les rejouer
+  const [playedTracks, setPlayedTracks] = useState([]);
+
+  const [disableBtn, setDisableBtn] = useState(false);
   // récupération du classement final des joueurs
   const [leaderboard, setLeaderboard] = useState([]);
 // condition pour la ternaire affichage classement 
@@ -92,6 +94,8 @@ export default function Quiz() {
         setPrepSeconds(prevSeconds => prevSeconds - 1);
       }, 1000);
       return () => clearInterval(countdown);
+    } else { 
+      setSongSeconds(25);
     }
   }, [prepSeconds]);
 
@@ -102,7 +106,7 @@ export default function Quiz() {
         setSongSeconds(prevSeconds => prevSeconds - 1);
       }, 1000);
       return () => clearInterval(countdown);
-    } else {
+    } else  if (songSeconds ===0){
       handleAnswerSubmission('');
     }
   }, [songSeconds]);
@@ -117,6 +121,8 @@ export default function Quiz() {
   const startNextRound = () => {
     setPrepSeconds(5);
     setSongSeconds(20);
+    setDisableBtn(false);
+
     if (playlist) {
       setCurrentTrack(getValidTrack(playlist.tracks.items));
       setAnswer('');
@@ -148,10 +154,13 @@ export default function Quiz() {
     const shuffledTracks = shuffleArray(tracks);
     for (const trackItem of shuffledTracks) {
       const track = trackItem.track;
-      if (track.preview_url) {
+      if (track.preview_url && !playedTracks.includes(track.id)) {
         validTrack = track;
         break;
       }
+    }
+    if (validTrack) {
+      setPlayedTracks(prevTracks => [...prevTracks, validTrack.id]);
     }
     return validTrack;
   };
@@ -179,6 +188,7 @@ export default function Quiz() {
   const handleSubmit = (e) => {
     e.preventDefault();
     handleAnswerSubmission(answer);
+    setDisableBtn(true)
   };
   // fonction soumission de la réponse 
   const handleAnswerSubmission = (answer) => {
@@ -189,7 +199,7 @@ export default function Quiz() {
       // bonne réponse
       if (normalizedAnswer === normalizedTitle || normalizedAnswer === normalizedArtist) {
         const pointsEarned = songSeconds * 7;
-        setPointsAwarded(true);
+      
         setPoints(prevPoints => prevPoints + pointsEarned);
         setMessage(`T'es trop fort ${username} ! ${pointsEarned} points pour Griffondor.`);
         // mauvais réponse
@@ -209,9 +219,11 @@ export default function Quiz() {
   };
   // bouton nouvelle partie - reset des paramètres
   const handleNewGame = () => {
-    setCompletedRounds(0);
+    setCompletedRounds(0);    
+    setDisableBtn(true)
+
     setPoints(0);
-    setPointsAwarded(false);
+    setPlayedTracks([]);
     setLeaderboard([]);
     setGameOver(false);
     setRoomId("")
@@ -264,7 +276,7 @@ export default function Quiz() {
                                       onChange={(e) => setAnswer(e.target.value)}
                                       placeholder="Entrez l'artiste ou le titre"
                                     />
-                                    <button className='btn-primary' type="submit">Envoyer</button>
+                                    <button className='btn-primary' type="submit" disabled={disableBtn}>Envoyer</button>
                                   </form>
                                   <div className={styles.message}>{message && <p>{message}</p>}</div>                
                 </>

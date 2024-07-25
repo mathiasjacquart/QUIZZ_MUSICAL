@@ -8,6 +8,7 @@ import styles from "./Lobby.module.scss";
 export default function Lobby() {
   const { username, roomId, setRoomId } = useContext(UserContext);
   const socket = useContext(WebSocketContext); 
+  const [disableBtn, setDisableBtn] = useState(false);
 
   const [players, setPlayers] = useState([]);
   const [error, setError] = useState('');
@@ -44,16 +45,19 @@ export default function Lobby() {
 
 // création room et écoute ws pour la création de room
   const createRoom = () => {
+    setDisableBtn(true)
     socket.send(JSON.stringify({ type: 'create_room', username }));
   };
 // rejoindre room et écoute ws pour rejoindre une room
 
   const joinRoom = (roomId) => {
+    setDisableBtn(true)
     socket.send(JSON.stringify({ type: 'join_room', roomId, username }));
   };
 // commencer une game  et écoute ws pour start une game
   const startGame = () => {
     if (roomId) {
+      setDisableBtn(true)
       socket.send(JSON.stringify({ type: 'start_game', roomId }));
     }
   };
@@ -76,10 +80,10 @@ export default function Lobby() {
         ) : (
           <>
             <div className='d-flex flex-column align-items-center'>
-              <button className='btn-primary' onClick={createRoom}>Créer un salon</button>
+              <button className='btn-primary' disabled={disableBtn} onClick={createRoom}>Créer un salon</button>
               <label htmlFor="roomId">Saisir l'ID du salon pour rejoindre :</label>
               <input id="roomId" type="text" placeholder="Entrer ID du salon" />
-              <button className='btn-primary' onClick={() => joinRoom(document.getElementById('roomId').value)}>Rejoindre un salon</button>
+              <button className='btn-primary' disabled={disableBtn} onClick={() => joinRoom(document.getElementById('roomId').value)}>Rejoindre un salon</button>
             </div>
           </>
         )}
