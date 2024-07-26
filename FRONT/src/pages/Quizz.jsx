@@ -202,6 +202,10 @@ export default function Quiz() {
       
         setPoints(prevPoints => prevPoints + pointsEarned);
         setMessage(`T'es trop fort ${username} ! ${pointsEarned} points pour Griffondor.`);
+        setTimeout(() => {
+          setCompletedRounds(prevRounds => prevRounds + 1);
+        }, 2000);
+      }
         // mauvais réponse
       } else {
         setMessage(`Eh non ${username} ! C'était ${currentTrack.name} de ${currentTrack.artists[0].name}`);
