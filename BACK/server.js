@@ -2,17 +2,17 @@ const express = require('express');
 const http = require('http');
 const WebSocket = require('ws');
 const path = require("path");
-const cors = require('cors');
+// const cors = require('cors');
 
 
 
 
 // creation d'un serveur express
 const app = express();
-app.use(cors({
-  origin: "https://quizz-musical.onrender.com", 
-  methods: ["GET", "POST"]
-}));
+// app.use(cors({
+//   origin: "https://quizz-musical.onrender.com", 
+//   methods: ["GET", "POST"]
+// }));
 const server = http.createServer(app);
 // creation d'un webscoket sur le serveur express
 const wss = new WebSocket.Server({ server
