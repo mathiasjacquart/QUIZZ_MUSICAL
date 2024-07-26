@@ -2,49 +2,69 @@ const express = require('express');
 const http = require('http');
 const WebSocket = require('ws');
 const path = require("path");
-// const cors = require('cors');
 
-
-
-
-// creation d'un serveur express
 const app = express();
-// app.use(cors({
-//   origin: "https://quizz-musical.onrender.com", 
-//   methods: ["GET", "POST"]
-// }));
 const server = http.createServer(app);
-// creation d'un webscoket sur le serveur express
-const wss = new WebSocket.Server({ server
-});
+const wss = new WebSocket.Server({ server });
 
 let rooms = {};
-// écoute des connexions au websockets
+
 wss.on('connection', (ws) => {
   console.log("New websocket connection");
+
   ws.on('message', (message) => {
+    console.log('Message received:', message);
     try {
       const data = JSON.parse(message);
 
+      // Log the parsed data for debugging
+      console.log('Parsed message data:', data);
+
+      // Validate the message type
+      if (!data.type) {
+        sendError(ws, 'Missing message type');
+        return;
+      }
+
       switch (data.type) {
         case 'create_room':
-          handleCreateRoom(ws, data);
+          if (validateCreateRoomData(data)) {
+            handleCreateRoom(ws, data);
+          } else {
+            sendError(ws, 'Invalid data for create_room');
+          }
           break;
 
         case 'join_room':
-          handleJoinRoom(ws, data);
+          if (validateJoinRoomData(data)) {
+            handleJoinRoom(ws, data);
+          } else {
+            sendError(ws, 'Invalid data for join_room');
+          }
           break;
 
         case 'start_game':
-          handleStartGame(data);
+          if (validateStartGameData(data)) {
+            handleStartGame(data);
+          } else {
+            sendError(ws, 'Invalid data for start_game');
+          }
           break;
 
         case 'submit_score':
-          handleSubmitScore(ws, data);
+          if (validateSubmitScoreData(data)) {
+            handleSubmitScore(ws, data);
+          } else {
+            sendError(ws, 'Invalid data for submit_score');
+          }
           break;
 
         case 'game_over':
-          handleGameOver(data.roomId);
+          if (validateGameOverData(data)) {
+            handleGameOver(data.roomId);
+          } else {
+            sendError(ws, 'Invalid data for game_over');
+          }
           break;
 
         default:
@@ -52,6 +72,7 @@ wss.on('connection', (ws) => {
           break;
       }
     } catch (error) {
+      console.error('Error processing message:', error);
       sendError(ws, 'Invalid message format');
     }
   });
@@ -65,7 +86,30 @@ wss.on('connection', (ws) => {
   });
 });
 
-// création d'une room avec les différents paramètres du joueur
+// Validation functions
+const validateCreateRoomData = (data) => {
+  return typeof data.username === 'string' && data.username.trim() !== '';
+};
+
+const validateJoinRoomData = (data) => {
+  return typeof data.roomId === 'string' && data.roomId.trim() !== '' &&
+         typeof data.username === 'string' && data.username.trim() !== '';
+};
+
+const validateStartGameData = (data) => {
+  return typeof data.roomId === 'string' && data.roomId.trim() !== '';
+};
+
+const validateSubmitScoreData = (data) => {
+  return typeof data.roomId === 'string' && data.roomId.trim() !== '' &&
+         typeof data.username === 'string' && data.username.trim() !== '' &&
+         typeof data.points === 'number';
+};
+
+const validateGameOverData = (data) => {
+  return typeof data.roomId === 'string' && data.roomId.trim() !== '';
+};
+
 const handleCreateRoom = (ws, data) => {
   const roomId = generateRoomId();
   console.log(`Creating room with ID ${roomId} for user ${data.username}`);
@@ -73,7 +117,6 @@ const handleCreateRoom = (ws, data) => {
   ws.send(JSON.stringify({ type: 'room_created', roomId }));
   updateRoomPlayers(roomId);
 };
-
 
 const handleJoinRoom = (ws, data) => {
   console.log(`User ${data.username} joining room ${data.roomId}`);
@@ -95,20 +138,19 @@ const handleStartGame = (data) => {
     room.players.forEach(player => {
       player.ws.send(JSON.stringify({ type: 'game_started' }));
     });
+  } else {
+    console.log(`Room not found or no players in room ${data.roomId}`);
   }
 };
 
-// fonction soumission du score
 const handleSubmitScore = (ws, data) => {
   console.log(`Submitting score for user ${data.username} in room ${data.roomId}`);
-  // gestion d'erreur si room il y a
   const room = rooms[data.roomId];
   if (!room) {
     console.log(`Room not found: ${data.roomId}`);
     sendError(ws, 'Room not found');
     return;
   }
-    // gestion d'erreur si player il y a
 
   const player = room.players.find(p => p.username === data.username);
   if (!player) {
@@ -116,10 +158,10 @@ const handleSubmitScore = (ws, data) => {
     sendError(ws, 'Player not found');
     return;
   }
-  // ajout des points en front dans l'objet player du ws
+
   player.points += data.points;
   room.scores.push({ username: data.username, points: player.points });
-  
+
   console.log(`Room scores after submission:`, room.scores);
 
   if (room.scores.length === room.players.length) {
@@ -136,7 +178,6 @@ const handleSubmitScore = (ws, data) => {
   }
 };
 
-// Mise à jour des joueurs dans la salle pour mettre à jour le salon dès qu'un joueur entre
 const updateRoomPlayers = (roomId) => {
   const room = rooms[roomId];
   if (room) {
@@ -164,9 +205,9 @@ const generateRoomId = () => {
 };
 
 const sendError = (ws, message) => {
+  console.log('Sending error:', message);
   ws.send(JSON.stringify({ type: 'error', message }));
 };
-
 
 const __DIRNAME = path.resolve();
 
