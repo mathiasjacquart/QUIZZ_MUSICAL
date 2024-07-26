@@ -205,7 +205,6 @@ export default function Quiz() {
         setTimeout(() => {
           setCompletedRounds(prevRounds => prevRounds + 1);
         }, 2000);
-      }
         // mauvais réponse
       } else {
         setMessage(`Eh non ${username} ! C'était ${currentTrack.name} de ${currentTrack.artists[0].name}`);
