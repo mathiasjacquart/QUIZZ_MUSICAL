@@ -4,7 +4,9 @@ const WebSocket = require('ws');
 const path = require("path");
 
 const app = express();
-const server = createServer(app);
+const server = app.listen(8080, () => {
+  console.log('Server is listening on port 8080');
+});
 const wss = new WebSocket.Server({ server });
 
 let rooms = {};
