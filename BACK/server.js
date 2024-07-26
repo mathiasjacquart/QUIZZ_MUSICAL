@@ -3,12 +3,20 @@ const http = require('http');
 const WebSocket = require('ws');
 const path = require("path");
 
+
+
+
 // creation d'un serveur express
 const app = express();
 
 const server = http.createServer(app);
 // creation d'un webscoket sur le serveur express
-const wss = new WebSocket.Server({ server });
+const wss = new WebSocket.Server( server, {
+  cors : { 
+    origin:"*",
+    methods: ["GET", "POST"]
+  }
+});
 
 let rooms = {};
 // écoute des connexions au websockets
