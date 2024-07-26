@@ -13,7 +13,7 @@ const server = http.createServer(app);
 // creation d'un webscoket sur le serveur express
 const wss = new WebSocket.Server( server, {
   cors : { 
-    origin:"*",
+    origin:["https://quizz-musical.onrender.com"],
     methods: ["GET", "POST"]
   }
 });
