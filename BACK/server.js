@@ -13,9 +13,10 @@ wss.on('connection', (ws) => {
   console.log("New websocket connection");
 
   ws.on('message', (message) => {
-    console.log('Message received:', message);
+    const messageStr = message.toString('utf8');
+    console.log('Message received:', messageStr);
     try {
-      const data = JSON.parse(message);
+      const data = JSON.parse(messageStr);
 
       // Log the parsed data for debugging
       console.log('Parsed message data:', data);
