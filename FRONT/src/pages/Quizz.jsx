@@ -1,324 +1,297 @@
-import  { useState, useEffect, useContext, useRef } from 'react';
-import styles from './Quizz.module.scss';
-import { UserContext } from '../context/context';
+import { useState, useEffect, useContext, useRef } from "react";
+import styles from "./Quizz.module.scss";
+import { UserContext } from "../context/context";
 import { WebSocketContext } from "../context/Websocket";
-import { getSpotifyToken, getPlaylistDetails } from '../../API/spotifyAPI';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 
 export default function Quiz() {
-  // récupération des usernames, rooms, socket du context
   const { username, roomId, setRoomId } = useContext(UserContext);
   const socket = useContext(WebSocketContext);
 
-
-  const [token, setToken] = useState(null);
-  // récupération de la playlist
-  const [playlist, setPlaylist] = useState(null);
-  // récupération de la chanson actuelle
   const [currentTrack, setCurrentTrack] = useState(null);
-
-  // compteur préparation d'une manche et durée d'une manche
   const [songSeconds, setSongSeconds] = useState(25);
   const [prepSeconds, setPrepSeconds] = useState(5);
-
-  // round pour affichage de la manche
   const [round, setRound] = useState(1);
-  // round terminé car envoie de réponse
   const [completedRounds, setCompletedRounds] = useState(0);
-  // récupération de la réponse user
-  const [answer, setAnswer] = useState('');
-  // feedback user
-  const [message, setMessage] = useState('');
-  // récupération - stockage des points 
+  const [answer, setAnswer] = useState("");
+  const [message, setMessage] = useState("");
   const [points, setPoints] = useState(0);
-  
-  //récupération des tracks déjà joués pour par les rejouer
-  const [playedTracks, setPlayedTracks] = useState([]);
-
-  const [disableBtn, setDisableBtn] = useState(false);
-  // récupération du classement final des joueurs
   const [leaderboard, setLeaderboard] = useState([]);
-// condition pour la ternaire affichage classement 
   const [gameOver, setGameOver] = useState(false);
+  const [hasAnswered, setHasAnswered] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isPrepared, setIsPrepared] = useState(false);
+  const [formError, setFormError] = useState("");
+  const [wrongAnswer, setWrongAnswer] = useState(false);
 
   const audioRef = useRef(null);
   const navigate = useNavigate();
 
-  // fetch de la playlist BLIND TEST
-  useEffect(() => {
-    const fetchData = async () => {
-      const token = await getSpotifyToken();
-      setToken(token);
-      if (token) {
-        const playlist = await getPlaylistDetails('2GPzX5QjVqGAgXYxPHEtGW', token);
-        setPlaylist(playlist);
-        setCurrentTrack(getValidTrack(playlist.tracks.items));
-      }
-    };
-    fetchData();
-  }, []);
-
-
-  // écoute des messages reçus via le web sockets et stockage dans useState
   useEffect(() => {
     if (socket) {
       socket.onmessage = (event) => {
         const data = JSON.parse(event.data);
-        console.log('Message received:', data);
-        if (data.type === 'leaderboard_update') {
-          setLeaderboard(data.leaderboard);
-        } else if (data.type === 'game_over') {
-          setGameOver(true);
-        } else if (data.type === 'next_round') {
-          startNextRound();
+        console.log("Message received:", data);
+
+        switch (data.type) {
+          case "new_track":
+            if (data.track && data.track.title && data.track.artist) {
+              setCurrentTrack(data.track);
+              setRound(data.round);
+              setPrepSeconds(5);
+              setSongSeconds(25);
+              setAnswer("");
+              setMessage("");
+              setFormError("");
+              setHasAnswered(false);
+              setIsPlaying(false);
+              setIsPrepared(false);
+              setWrongAnswer(false);
+            } else {
+              console.error("Invalid track data received:", data.track);
+              setMessage("Erreur : données de la piste invalides");
+            }
+            break;
+          case "leaderboard_update":
+            console.log("Received leaderboard update:", data.leaderboard);
+            setLeaderboard(data.leaderboard);
+            break;
+          case "game_over":
+            console.log("Game over received");
+            setGameOver(true);
+            break;
+          case "error":
+            setMessage(data.message);
+            break;
         }
       };
     }
   }, [socket]);
 
-  // envoie des scores et reset de la durée de la manche pour arriver à la page des scores
   useEffect(() => {
     if (completedRounds === 10) {
-       console.log('Sending score to server:', { type: 'submit_score', roomId, username, points });
-      socket.send(JSON.stringify({ type: 'submit_score', roomId, username, points }));
-      setSongSeconds(0)
-
+      socket.send(
+        JSON.stringify({
+          type: "submit_score",
+          roomId,
+          username,
+          points,
+        })
+      );
+      setSongSeconds(0);
     }
   }, [completedRounds, points, roomId, username, socket]);
 
-// timer préparation de la manche
-
+  // Timer de préparation
   useEffect(() => {
     if (prepSeconds > 0) {
       const countdown = setInterval(() => {
-        setPrepSeconds(prevSeconds => prevSeconds - 1);
+        setPrepSeconds((prevSeconds) => prevSeconds - 1);
       }, 1000);
       return () => clearInterval(countdown);
-    } else { 
-      setSongSeconds(25);
+    } else {
+      setIsPrepared(true);
     }
   }, [prepSeconds]);
 
-  // timer durée de la manche
+  // Démarrage de l'audio et du timer de la chanson après la préparation
   useEffect(() => {
-    if (songSeconds > 0) {
+    if (isPrepared && currentTrack && !isPlaying) {
+      playAudio(currentTrack);
+      setIsPlaying(true);
+    }
+  }, [isPrepared, currentTrack, isPlaying]);
+
+  // Timer de la chanson
+  useEffect(() => {
+    if (isPrepared && songSeconds > 0 && !hasAnswered) {
       const countdown = setInterval(() => {
-        setSongSeconds(prevSeconds => prevSeconds - 1);
+        setSongSeconds((prevSeconds) => prevSeconds - 1);
       }, 1000);
       return () => clearInterval(countdown);
-    } else  if (songSeconds ===0){
-      handleAnswerSubmission('');
+    } else if (songSeconds === 0 && !hasAnswered) {
+      setHasAnswered(true);
+      if (currentTrack) {
+        setMessage(
+          `Dommage, le temps est écoulé ! C'était <strong>${currentTrack.title}</strong> de <strong>${currentTrack.artist}</strong>`
+        );
+      } else {
+        setMessage("Dommage, le temps est écoulé !");
+      }
+
+      // Arrêter l'audio
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+
+      setTimeout(() => {
+        setCompletedRounds((prevRounds) => prevRounds + 1);
+        socket.send(JSON.stringify({ type: "next_round", roomId }));
+      }, 2000);
     }
-  }, [songSeconds]);
-
-  // reset des paramètres pour chaque manche
-  useEffect(() => {
-    if (completedRounds > 0 && completedRounds < 10) {
-      startNextRound();
-    }
-  }, [completedRounds]);
-
-  const startNextRound = () => {
-    setPrepSeconds(5);
-    setSongSeconds(20);
-    setDisableBtn(false);
-
-    if (playlist) {
-      setCurrentTrack(getValidTrack(playlist.tracks.items));
-      setAnswer('');
-      setMessage('');
-      // callback pour ajouter au précédent chiffre
-      setRound(prevRound => prevRound + 1);
-    }
-  };
-
-
-  // gestion d'erreur de la chanson jouée 
-  useEffect(() => {
-    if (currentTrack && audioRef.current) {
-      playAudio(currentTrack);
-    }
-  }, [currentTrack]);
+  }, [songSeconds, hasAnswered, isPrepared, currentTrack, roomId, socket]);
 
   const playAudio = (track) => {
     if (audioRef.current) {
-      audioRef.current.src = track.preview_url;
-      audioRef.current.play().catch(() => {
-        setCurrentTrack(getValidTrack(playlist.tracks.items));
+      audioRef.current.src = track.preview;
+      audioRef.current.play().catch((error) => {
+        console.error("Error playing audio:", error);
+        setMessage("Erreur lors de la lecture de l'audio");
       });
     }
   };
-  // 
-  const getValidTrack = (tracks) => {
-    let validTrack = null;
-    const shuffledTracks = shuffleArray(tracks);
-    for (const trackItem of shuffledTracks) {
-      const track = trackItem.track;
-      if (track.preview_url && !playedTracks.includes(track.id)) {
-        validTrack = track;
-        break;
-      }
-    }
-    if (validTrack) {
-      setPlayedTracks(prevTracks => [...prevTracks, validTrack.id]);
-    }
-    return validTrack;
-  };
-   // fonction sélection aléatoire d'un tableau (playlist)
-  const shuffleArray = (array) => {
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]];
-    }
-    return array;
-  };
-
-  // normalisation de la réponse utilisateur
 
   const normalizeString = (str) => {
     return str
-      .toLowerCase() // minuscule
-      .normalize('NFD') // normalisation NFD
-      .replace(/[\u0300-\u036f]/g, '') // supprimer les accents
-      .replace(/[\s\W]/g, ''); // supprimer les espaces 
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[\s\W]/g, "");
   };
 
-
-  // fonction bouton de la soumission
   const handleSubmit = (e) => {
     e.preventDefault();
-    handleAnswerSubmission(answer);
-    setDisableBtn(true)
-  };
-  // fonction soumission de la réponse 
-  const handleAnswerSubmission = (answer) => {
-    if (currentTrack) {
-      const normalizedAnswer = normalizeString(answer);
-      const normalizedTitle = normalizeString(currentTrack.name);
-      const normalizedArtist = normalizeString(currentTrack.artists[0].name);
-      // bonne réponse
-      if (normalizedAnswer === normalizedTitle || normalizedAnswer === normalizedArtist) {
-        const pointsEarned = songSeconds * 7;
-      
-        setPoints(prevPoints => prevPoints + pointsEarned);
-        setMessage(`T'es trop fort ${username} ! ${pointsEarned} points pour Griffondor.`);
-        setTimeout(() => {
-          setCompletedRounds(prevRounds => prevRounds + 1);
-        }, 2000);
-        // mauvais réponse
-      } else {
-        setMessage(`Eh non ${username} ! C'était ${currentTrack.name} de ${currentTrack.artists[0].name}`);
-        setTimeout(() => {
-          setCompletedRounds(prevRounds => prevRounds + 1);
-        }, 2000);
+    if (!hasAnswered) {
+      if (answer.trim() === "") {
+        setFormError("Veuillez entrer une réponse");
+        return;
       }
-      // pas de réponse
-    } else {
-      setMessage(`Il fallait te dépêcher ${username}, c'était ${currentTrack.name} de ${currentTrack.artists[0].name}`);
-      setTimeout(() => {
-        setCompletedRounds(prevRounds => prevRounds + 1);
-      }, 2000);
+      setFormError("");
+      handleAnswerSubmission(answer);
     }
   };
-  // bouton nouvelle partie - reset des paramètres
-  const handleNewGame = () => {
-    setCompletedRounds(0);    
-    setDisableBtn(true)
 
+  const handleAnswerSubmission = (submittedAnswer) => {
+    if (currentTrack && !hasAnswered) {
+      const normalizedAnswer = normalizeString(submittedAnswer);
+      const normalizedTitle = normalizeString(currentTrack.title);
+      const normalizedArtist = normalizeString(currentTrack.artist);
+
+      if (
+        normalizedAnswer === normalizedTitle ||
+        normalizedAnswer === normalizedArtist
+      ) {
+        setHasAnswered(true);
+        const pointsEarned = songSeconds * 7;
+        setPoints((prevPoints) => prevPoints + pointsEarned);
+        setMessage(
+          `Félicitations ${username} ! ${pointsEarned} points pour Griffondor.`
+        );
+        setWrongAnswer(false);
+
+        // Arrêter l'audio
+        if (audioRef.current) {
+          audioRef.current.pause();
+          audioRef.current.currentTime = 0;
+        }
+
+        setTimeout(() => {
+          setCompletedRounds((prevRounds) => prevRounds + 1);
+          socket.send(JSON.stringify({ type: "next_round", roomId }));
+        }, 2000);
+      } else {
+        setMessage("Retente ta chance !");
+        setAnswer("");
+      }
+    }
+  };
+
+  const handleNewGame = () => {
+    setCompletedRounds(0);
     setPoints(0);
-    setPlayedTracks([]);
     setLeaderboard([]);
     setGameOver(false);
-    setRoomId("")
-    navigate('/');
+    setRoomId("");
+    navigate("/");
   };
-    // console.log(completedRounds);
-  return (
 
+  return (
     <div className={styles.Quiz}>
- 
-      <div className={styles.points}>
-        <div className='d-flex flex-column center'>
+      <div className={styles.header}>
+        <div className={styles.points}>
           <p>Points</p>
           <p>{points}</p>
         </div>
+        <div className={styles.countdown}>
+          <p>Temps</p>
+          <p>{isPrepared ? songSeconds : prepSeconds}s</p>
+        </div>
       </div>
-      <div className={styles.center}>
-        {prepSeconds > 0 ? (
-          <div className={styles.prep}>
-            <p >Prépares-toi {username} !</p>
-            <p>{prepSeconds}</p>
-          </div>
-        ) : (
-          <>
-            {songSeconds > 0 ? (
-              <>
-
-                <div className={styles.countdown}>
-                    <p>{songSeconds}</p>
-                </div> 
-
-                                  {currentTrack && (
-                                    <div>
-                                      <div className={styles.manche}>
-                                        <p>Manche {round}</p>
-                                      </div>
-                                      <div>
-                                        <audio ref={audioRef} autoPlay>
-                                          <source src={currentTrack.preview_url} type="audio/mpeg" />
-                                        </audio>
-                                      </div>
-                                    </div>
-                                  )}
-                                  <form onSubmit={handleSubmit}>
-                                    <label htmlFor="Answer">Saisissez l'artiste ou le titre de la chanson :</label>
-                                    <input
-                                      autoFocus
-                                      type="text"
-                                      value={answer}
-                                      onChange={(e) => setAnswer(e.target.value)}
-                                      placeholder="Entrez l'artiste ou le titre"
-                                    />
-                                    <button className='btn-primary' type="submit" disabled={disableBtn}>Envoyer</button>
-                                  </form>
-                                  <div className={styles.message}>{message && <p>{message}</p>}</div>                
-                </>
-            ) : (
-              <>
-                {completedRounds < 10 ? (
-                  <p className={styles.nextRound}>Manche suivante dans quelques secondes...</p>
-                ) : (
-                  <>
-                    {gameOver ? (
-                      <div>
-                         {gameOver && (
-                          <div className={styles.leaderboard}>
-                            <h3>Classement Final</h3>
-                            <ol >
-                              {leaderboard.map((player, index) => (
-                                <li  className={styles.scores} key={index}> {player.username}: {player.points} points</li>
-                              ))}
-                            </ol>
-                            <button onClick={handleNewGame} className="btn-primary">Nouvelle Partie</button>
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <div>
-                      <svg className={styles.loading} viewBox="25 25 50 50">
-                      <circle r="20" cy="50" cx="50"></circle>
-                    </svg>
-                    <p className={styles.loadingText}>En attente des scores des autres joueurs...</p>
-                      </div>
-
-                    )}
-                  </>
-                )}
-              </>
-            )}
-          </>
-        )}
+      <div className={styles.quizzContainer}>
+        <div className={styles.quizzForm}>
+          {prepSeconds > 0 ? (
+            <div className={styles.prep}>
+              <p>Prépares-toi {username} !</p>
+              <p>{prepSeconds}</p>
+            </div>
+          ) : gameOver ? (
+            <div className={styles.gameOver}>
+              <h4>Partie terminée !</h4>
+              <h5>Classement final :</h5>
+              <ul className={styles.leaderboard}>
+                {leaderboard.map((player, index) => (
+                  <li key={index} className={styles.leaderboardItem}>
+                    <span className={styles.rank}>
+                      #{index + 1} {""}
+                    </span>
+                    <span className={styles.username}>
+                      {player.username} {""} - {""}
+                    </span>
+                    <span className={styles.score}>{player.points} points</span>
+                  </li>
+                ))}
+              </ul>
+              <button className="btn-primary" onClick={handleNewGame}>
+                Nouvelle partie
+              </button>
+            </div>
+          ) : (
+            <div className={styles.game}>
+              <div className={styles.round}>
+                <p>Manche {round} </p>
+              </div>
+              <form onSubmit={handleSubmit}>
+                <label htmlFor="answer">
+                  Quel est le titre ou l'interprète de la chanson ?
+                </label>
+                <input
+                  type="text"
+                  value={answer}
+                  onChange={(e) => {
+                    setAnswer(e.target.value);
+                    setFormError("");
+                  }}
+                  disabled={hasAnswered || !isPrepared}
+                  placeholder="Insérer votre réponse ici..."
+                  className={styles.answerInput}
+                />
+                <div className="flex">
+                  {formError && <p className={styles.formError}>{formError}</p>}
+                </div>
+                <button
+                  className="btn-primary"
+                  type="submit"
+                  disabled={hasAnswered || !isPrepared}
+                >
+                  Valider ma réponse
+                </button>
+              </form>
+              {message && (
+                <p
+                  className={styles.message}
+                  dangerouslySetInnerHTML={{ __html: message }}
+                />
+              )}
+              {wrongAnswer && !message && (
+                <p className={styles.wrongAnswer}>Retente ta chance !</p>
+              )}
+            </div>
+          )}
+        </div>
       </div>
+
+      <audio ref={audioRef} />
     </div>
   );
 }

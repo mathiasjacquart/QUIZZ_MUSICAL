@@ -1,127 +1,116 @@
-@use  "../assets/styles/mixins" as mixin;
+@use "../assets/styles/mixins" as mixin;
 
 .Lobby {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
+  position: absolute;
+  z-index: 3;
+  .center {
+    width: 500px;
+    height: 350px;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
-    width: 100vw;
-    position: absolute;
-    z-index: 3;
-    .center {
-       
-        width: 500px;
-        height: 350px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        flex-direction: column;
-        background-color: #fff; 
-        border-radius: 10px; //
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        @include mixin.xs { 
-          width: 300px;
-          }
-        text-align: center;
-        .container { 
-          width: 100%;
-          padding: 00px 50px;
-          ul { 
-            text-align: left;
-          }
-        }
-        h1 { 
-          width: 100%;
-          background-color: var(--primary) !important;
-          font-weight: 500;
-          font-size: 30px;
-          text-align: center;
-          padding: 14px 0px;
-          margin-top: -92px;
-          border-top-left-radius: 10px;
-          border-top-right-radius: 10px;
-          color: rgb(255, 255, 255);
-          margin-bottom: 25px;
-    
-            @include mixin.xs { 
-               font-size: 30px;
-               margin-top: -85px;
-               margin-bottom: 20px;
+    flex-direction: column;
+    background-color: #fff;
+    border-radius: 10px; //
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    @include mixin.xs {
+      width: 300px;
+    }
+    text-align: center;
+    .container {
+      width: 100%;
+      padding: 00px 50px;
+      ul {
+        text-align: left;
+      }
+    }
+    h1 {
+      width: 100%;
+      background-color: var(--primary) !important;
+      font-weight: 500;
+      font-size: 30px;
+      text-align: center;
+      padding: 14px 0px;
+      margin-top: -92px;
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+      color: rgb(255, 255, 255);
+      margin-bottom: 25px;
 
-            }
-        
+      @include mixin.xs {
+        font-size: 30px;
+        margin-top: -85px;
+        margin-bottom: 20px;
+      }
+    }
+    p {
+      font-size: 16px;
+      margin: 10px 0;
+      color: var(--primary);
+      @include mixin.xs {
+        font-size: 30px;
+      }
+    }
+    h2 {
+      font-size: 30px;
+      margin: 10px 0;
 
-            
-        }
-        p {
-            font-size: 30px;
-            margin: 10px 0;
-            color: var(--primary);
-            @include mixin.xs { 
-             font-size: 30px;
-          }
-          }
-          h2 {
-            font-size: 30px;
-            margin: 10px 0;
-            
-            color: var(--primary);
-            @include mixin.xs { 
-             font-size: 20px;
-          }
-        
-          }
-          h3 {
-            font-size: 30px;
-            text-align: left;
-            font-weight: 200;
-            margin: 0px 0;
-            color: var(--primary);
-            @include mixin.xs { 
-             font-size: 20px;
-          }
-        
-          }
-        input {
-            width: 300px;
-            padding: 10px;
-            font-size: 1rem;
-            margin: 10px 0px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            &:focus-visible{ 
-              outline: 1px solid var(--primary);
-          }
-            @include mixin.xs { 
-              width: 200px;
-          }
-          }
-          ul {
-            li { 
-                font-size: 20px;
-            }
-          }
-          button{
-            width: 300px;
-            margin: 15px 0px;
-            @include mixin.xs { 
-                width: 200px;
-            }
-          }
-          label { 
-            font-size: 20px;
-            text-align: left;
-            margin-top: 15px;
-            margin-bottom: 10px;
-            color: var(--primary);
-            text-decoration: underline;
-            @include mixin.xs { 
-              font-size: 16px;
-              
-          }
-          }
-
-        }
-
+      color: var(--primary);
+      @include mixin.xs {
+        font-size: 20px;
+      }
+    }
+    h3 {
+      font-size: 30px;
+      text-align: left;
+      font-weight: 200;
+      margin: 0px 0;
+      color: var(--primary);
+      @include mixin.xs {
+        font-size: 20px;
+      }
+    }
+    input {
+      width: 300px;
+      padding: 10px;
+      font-size: 1rem;
+      margin: 10px 0px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      &:focus-visible {
+        outline: 1px solid var(--primary);
+      }
+      @include mixin.xs {
+        width: 200px;
+      }
+    }
+    ul {
+      li {
+        font-size: 20px;
+      }
+    }
+    button {
+      width: 300px;
+      margin: 10px 0px;
+      @include mixin.xs {
+        width: 200px;
+      }
+    }
+    label {
+      font-size: 20px;
+      text-align: left;
+      margin-top: 8px;
+      margin-bottom: 5px;
+      color: var(--primary);
+      text-decoration: underline;
+      @include mixin.xs {
+        font-size: 16px;
+      }
+    }
+  }
 }
-
